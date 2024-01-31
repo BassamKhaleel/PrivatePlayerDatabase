@@ -6,7 +6,7 @@ util.require_natives("3095a", "g")
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.0)
+local localVer = tonumber(0.1)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
