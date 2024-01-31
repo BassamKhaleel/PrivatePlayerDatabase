@@ -4,6 +4,35 @@
 -- util.require_natives("natives-1672190175-uno") ALTE NATIVE VERSION
 util.require_natives("3095a", "g")
 
+--Version Check / Auto Updater
+local response = false
+local localVer = tonumber(0.0)
+async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
+    currentVer = tonumber(output)
+    response = true
+    if localVer ~= currentVer then
+        util.toast(sprefix .. " Version " .. localVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
+        menu.action(menu.my_root(), "Update Lua", {}, "", function()
+            async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
+                local err = select(2,load(a))
+                if err then
+                    util.toast(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.")
+                return end
+                local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+                f:write(a)
+                f:close()
+                util.toast(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet")
+                util.restart_script()
+            end)
+            async_http.dispatch()
+        end)
+    end
+end, function() response = true end)
+async_http.dispatch()
+repeat 
+    util.yield()
+until response
+
 --json--
 json = require("json")
 
@@ -27,8 +56,6 @@ modders_in_db = 0
 tryhards_in_db = 0
 freunde_in_db = 0
 streamer_in_db = 0
-
-
 
 --variablen für die automatische modder erkennung--
 report_modded_explo = true
