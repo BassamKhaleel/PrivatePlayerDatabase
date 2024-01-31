@@ -12,7 +12,7 @@ async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDataba
     response = true
     if localVer ~= currentVer then
         util.toast(sprefix .. " Version " .. localVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
-        menu.action(menu.my_root(), "Update Lua", {}, "", function()
+        menu.action(menu.my_root(), "Skript Updaten", {}, "", function()
             async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
                 local err = select(2,load(a))
                 if err then
