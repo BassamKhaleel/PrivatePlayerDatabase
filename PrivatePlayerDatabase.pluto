@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.2)
+local localVer = tonumber(0.3)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -932,39 +932,6 @@ local function player(pid) --Spieler Funktionen--
                 menu.trigger_commands("dbsetname " .. playername)
                 menu.trigger_commands("dbsetrid " .. playerid)
                 menu.focus(psetnotizpresetref)
-            end)
-
-            player_test = menu.action(menu.player_root(pid), "Test", {}, "Test", function()
-                menu.focus(menu.ref_by_path("Online>Player History>Apfelschorleee"))
-                menu.focus(player_test)
-                value = menu.get_state(menu.ref_by_path("Online>Player History>Apfelschorleee>Whitelist Join"))
-                util.toast(value)
-                --time = math.random(500, 3000)
-                --util.toast(time)
-                --util.toast(menu.get_activation_key_hash())
-                --util.log(menu.get_activation_key_hash())
-                --local playername = players.get_name(pid)
-                --local playernameWithTags = players.get_name_with_tags(pid)
-                -- Players>BangerForLifeNLR />Information>Status>Health
-                -- local sessiontype = SessionType()
-                -- menu.ref_by_path("Online>Protections>Detections>Any Detection>Write To Log File")
-                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
-                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Test"))
-                --local health = menu.get_value(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
-                --util.toast(tostring(health))
-                -- local value2 = menu.get_value(menu.ref_by_command_name("historynote" .. playername))
-                -- util.toast(tostring(value2))
-                -- if not value2 == "Modder2" then
-                --     util.toast("Note lautete nicht Modder2")
-                -- else
-                --     util.toast("Note lautet Modder2")
-                -- end
-            end)
-
-            menu.action(menu.player_root(pid), "Menü Sprachen Check", {}, "Gibt die aktuelle Menü Sprache wieder", function ()
-                -- en = English (UK)
-                -- de = German - Deutsch
-                util.toast(menu_language)
             end)
         else
             menu.divider(menu.player_root(pid), 'Deaktiviere "Internetzugang deaktivieren"')
