@@ -6,7 +6,7 @@ util.require_natives("3095a", "g")
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.1)
+local localVer = tonumber(0.2)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -40,7 +40,6 @@ json = require("json")
 sprefix = "[PrivatePlayerDatabase]"
 
 --variablen für die webhook und die datenbank--
-auth = "Basic TkxSX0x1YV9BUElfQUREOjIhbWRrYUYoMmgkMg=="
 script_user_name = players.get_name(players.user())
 report_to_dev = true
 
@@ -440,7 +439,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                             util.log(sprefix .. " Der Spieler wurde erfolgreich aus der Datenbank gelöscht")
                             util.toast(sprefix .. " Der Spieler wurde erfolgreich aus der Datenbank gelöscht")
                         end)
-                        async_http.add_header("Authorization", auth)
+                        async_http.add_header("Authorization", website_auth)
                         async_http.set_method("DELETE")
                         async_http.dispatch()
                     else
@@ -455,7 +454,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         end)
     end
@@ -711,11 +710,11 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         async_http.dispatch()
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
 
             if player_in_db == 0 then --Wenn Spieler noch nicht in der Datenbank steht--
@@ -1020,7 +1019,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1070,7 +1069,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         elseif string.find(detection, "Hidden From Player List") or string.find(detection, "Von Spielerliste Versteckt") then
             local playername = players.get_name(pid)
@@ -1088,7 +1087,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1138,7 +1137,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         elseif string.find(detection, "Explosion Blaming") then
             local playername = players.get_name(pid)
@@ -1156,7 +1155,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1206,7 +1205,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         elseif string.find(detection, "Damage Multiplier") or string.find(detection, "Schadensmultiplikator") then
             local playername = players.get_name(pid)
@@ -1224,7 +1223,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1263,7 +1262,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         elseif string.find(detection, "Super Jump") or string.find(detection, "Super-Springen") then
             local playername = players.get_name(pid)
@@ -1281,7 +1280,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1320,7 +1319,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
             elseif string.find(detection, "Modded Driveby Weapon") then
 
@@ -1342,7 +1341,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1381,7 +1380,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         elseif string.find(detection, "Modded Character Model") then
 
@@ -1403,7 +1402,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1442,7 +1441,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
         -- elseif string.find(detection, "Attacking While Invulnerable") or string.find(detection, "Angriff Wärend Unverwundbar") then
         --     local playername = players.get_name(pid)
@@ -1460,7 +1459,7 @@ function send_to_webhook(pid, detection)
         --                 end
         --             end)
         --             async_http.set_post("application/json", json.encode(tabletest))
-        --             async_http.add_header("Authorization", auth)
+        --             async_http.add_header("Authorization", website_auth)
         --             async_http.dispatch()
 
         --             local body = [[
@@ -1499,7 +1498,7 @@ function send_to_webhook(pid, detection)
         --             async_http.dispatch()
         --         end
         --     end)
-        --     async_http.add_header("Authorization", auth)
+        --     async_http.add_header("Authorization", website_auth)
         --     async_http.dispatch()
         elseif string.find(detection, "Modded Explosion") or string.find(detection, "Gemoddete Explosion") then
             local playername = players.get_name(pid)
@@ -1517,7 +1516,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", auth)
+                    async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
 
                     local body = [[
@@ -1567,11 +1566,11 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", auth)
+            async_http.add_header("Authorization", website_auth)
             async_http.dispatch() 
         end
     end)
-    async_http.add_header("Authorization", auth)
+    async_http.add_header("Authorization", website_auth)
     async_http.dispatch()
 end
 
@@ -1684,7 +1683,7 @@ players.on_join(function(pid)
             --menu.trigger_commands("historynote" .. playername .. " Streamer")
         end
     end)
-    async_http.add_header("Authorization", auth)
+    async_http.add_header("Authorization", website_auth)
     async_http.dispatch()
     util.yield(200)
 end)
