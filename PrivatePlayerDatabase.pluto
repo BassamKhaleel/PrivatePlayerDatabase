@@ -4,6 +4,9 @@
 -- util.require_natives("natives-1672190175-uno") ALTE NATIVE VERSION
 util.require_natives("3095a", "g")
 
+--skript prefix--
+sprefix = "[PrivatePlayerDatabase]"
+
 --Version Check / Auto Updater
 local response = false
 local localVer = tonumber(0.2)
@@ -11,7 +14,7 @@ async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDataba
     currentVer = tonumber(output)
     response = true
     if localVer ~= currentVer then
-        util.toast(sprefix .. " Version " .. localVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
+        util.toast(sprefix .. " Version " .. currentVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
         menu.action(menu.my_root(), "Skript Updaten", {}, "", function()
             async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
                 local err = select(2,load(a))
@@ -35,9 +38,6 @@ until response
 
 --json--
 json = require("json")
-
---skript prefix--
-sprefix = "[PrivatePlayerDatabase]"
 
 --variablen für die webhook und die datenbank--
 script_user_name = players.get_name(players.user())
