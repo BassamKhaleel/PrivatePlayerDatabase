@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.3)
+local localVer = tonumber(0.4)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -740,6 +740,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 if timeout_modders then
                     if psetstatus == 3 then
                         menu.trigger_commands("timeout " .. psetname .. " on")
+                    end
+                end
+
+                if sc_block_modder then
+                    if psetstatus == 3 then
+                        if util.sc_is_blocked(psetrid) == false then
+                            util.sc_block(psetrid)
+                        end
                     end
                 end
 
