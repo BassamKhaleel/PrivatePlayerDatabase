@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.4)
+local localVer = tonumber(0.401)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -80,6 +80,7 @@ note_for_modder = false
 block_modder_join = false
 modder_join_notification = false
 timeout_modders = false
+sc_block_modder = false
 
 --tryhard variablen--
 note_for_tryhard = false
@@ -844,6 +845,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 timeout_modders = true
             else
                 timeout_modders = false
+            end
+        end)
+
+        menu.toggle(db_modder_settings, "Modder Blockieren", {}, "Blockiert Modder im SocialClub um keine nervigen Nachrichten zu bekommen.", function(on)
+            if on then
+                sc_block_modder = true
+            else
+                sc_block_modder = false
             end
         end)
 
