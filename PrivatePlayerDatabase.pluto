@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.401)
+local localVer = tonumber(0.45)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -73,6 +73,7 @@ has_websiteauth = false
 --freunde variablen--
 note_for_friend = false
 whitelist_friend_join = false
+sc_unblock_friend = false
 
 --modder variablen--
 auto_kick_modders = false
@@ -764,6 +765,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         end
                     end
                 end
+
+                if sc_unblock_friend then
+                    if psetstatus == 2 then
+                        if util.sc_is_blocked(psetrid) == true then
+                            util.sc_unblock(psetrid)
+                        end
+                    end
+                end    
             end
         end)
     end
@@ -802,6 +811,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 whitelist_friend_join = true
             else
                 whitelist_friend_join = false
+            end
+        end)
+
+        menu.toggle(db_friend_settings, "Freunde Entblocken", {}, "Entblockt Spieler im SocialClub wenn diese als Freund in der Datenbank stehen.", function(on)
+            if on then
+                sc_unblock_friend = true
+            else
+                sc_unblock_friend = false
             end
         end)
 
@@ -878,7 +895,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             else
                 report_super_jump = false
             end
-        end)
+        end, true)
 
         menu.toggle(db_auto_detections, "Damage Multiplier", {}, 'Aktiviert/Deaktiviert das Modder welche "Damage Multiplier" triggern automatisch auf die Datenbank hinzugefügt werden.', function(on)
             if on then
@@ -886,7 +903,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             else
                 report_damage_multiplier = false
             end
-        end)
+        end, true)
 
         menu.toggle(db_auto_detections, "Modded Explosion", {}, 'Aktiviert/Deaktiviert das Modder welche "Modded Explosion" triggern automatisch auf die Datenbank hinzugefügt werden.', function(on)
             if on then
@@ -894,7 +911,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             else
                 report_modded_explo = false
             end
-        end)
+        end, true)
 
         menu.toggle(db_auto_detections, "Hidden From Player List", {}, 'Aktiviert/Deaktiviert das Modder welche "Hidden From Player List" triggern automatisch auf die Datenbank hinzugefügt werden.', function(on)
             if on then
@@ -902,7 +919,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             else
                 report_hidden_from_playerlist = false
             end
-        end)
+        end, true)
 
         menu.divider(menu.my_root(), "Zusatz") -- Skript Einstellungen--
         local db_statistik <const> = menu.list(menu.my_root(), "Skript Statistiken" , {}, "") --Skript Statistiken liste--
@@ -911,6 +928,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
         menu.action(db_statistik, "Skript Statistiken laden", {}, "Lädt die Skript Statistiken. Alle Statistiken gelten von letztem Skript Start.", function ()
 
             if statistiken_geladen == false then
+                statistiken_geladen = true
                 util.toast(sprefix .. " Die Statistiken werden geladen")
                 util.log(sprefix .. " Die Statistiken werden geladen")
                 util.yield(350)
@@ -918,7 +936,6 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 players_checked_div_stat = menu.divider(db_statistik, "Spieler überprüft: " .. players_checked)
                 players_reported_div_stat = menu.divider(db_statistik, "Spieler hinzugefügt: " .. players_reported)
                 players_in_db_div_stat = menu.divider(db_statistik, "Spieler bereits in der Datenbank: " .. players_in_db)
-                statistiken_geladen = true
             end
 
             if statistiken_geladen == true then
