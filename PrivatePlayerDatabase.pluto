@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.45)
+local localVer = tonumber(0.46)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -1004,7 +1004,7 @@ function send_to_webhook(pid, detection)
 
         util.log(sprefix .. " [Automatische Modder Erkennung] " .. players.get_name(pid) .. "(" .. players.get_rockstar_id(pid) .. ") wurde wegen " .. detection .. " auf die Datenbank übertragen.")
 
-        if string.find(detection, "Spoofed Host Token") or string.find(detection, "Gespoofte Host-Marke") then
+        if string.find(detection, "Spoofed Host Token") then
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Spoofed Host Token (" .. tostring(players.get_host_token_hex(pid)) .. " / " .. tostring(players.get_host_token(pid)) .. ") [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1072,7 +1072,7 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-        elseif string.find(detection, "Hidden From Player List") or string.find(detection, "Von Spielerliste Versteckt") then
+        elseif string.find(detection, "Hidden From Player List") and report_hidden_from_playerlist then
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Hidden From Player List [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1208,7 +1208,7 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-        elseif string.find(detection, "Damage Multiplier") or string.find(detection, "Schadensmultiplikator") then
+        elseif string.find(detection, "Damage Multiplier") and report_damage_multiplier then
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Damage Multiplier [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1265,7 +1265,7 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-        elseif string.find(detection, "Super Jump") or string.find(detection, "Super-Springen") then
+        elseif string.find(detection, "Super Jump") and report_super_jump then
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Super Jump [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1322,7 +1322,7 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-            elseif string.find(detection, "Modded Driveby Weapon") then
+        elseif string.find(detection, "Modded Driveby Weapon") then
 
             local mdw = detection
             local mdw2 = mdw:match("%((.-)%)%)")
@@ -1501,7 +1501,7 @@ function send_to_webhook(pid, detection)
         --     end)
         --     async_http.add_header("Authorization", website_auth)
         --     async_http.dispatch()
-        elseif string.find(detection, "Modded Explosion") or string.find(detection, "Gemoddete Explosion") then
+        elseif string.find(detection, "Modded Explosion") and report_modded_explo then
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Modded Explosion [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
