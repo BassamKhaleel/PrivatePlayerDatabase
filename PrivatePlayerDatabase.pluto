@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.47)
+local localVer = tonumber(0.48)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -275,41 +275,14 @@ local function new_detection(pid, name)
 end
 
 local detection_types = menu.ref_by_path("Online>Protections>Detections"):getChildren():map(|d| -> lang.get_localised(d.menu_name)):filter(|d| -> not d in detection_excludes):reorder()
-
 local values = {}
 local checkmodderdb = true
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------- #Spieler Suche
 if has_webhookurl and has_websiteurl and has_websiteauth then
     if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
-        menu.toggle(menu.my_root(), "Datenbank Check", {"dbcheck"}, "Überprüft joinende Spieler ob sie in der Datenbank hinterlegt sind.", function(on)
-            checkmodderdb = on
-            if on then
-                --instead of checking the log file, using this fancy way to listen for detections (Note: it won't include detections added by other scripts, such as JinxScript)--
-                new_detection_handler = players.on_flow_event_done(function(pid, name, extra)
-                    name = lang.get_localised(name)
-                    if not name in detection_types then return end
-
-                    if extra then
-                        name ..= $" ({extra})"
-                    end
-
-                    if new_detection(pid, name) then
-                        send_to_webhook(pid, name, false, false)
-                    end
-                end)
-            end
-            if not on then
-                --stop the respective handlers--
-                util.remove_handler(new_detection_handler)
-            end
-        end)
-    end
-end
-
----------------------------------------------------------------------------------------------------------------------------------------------------------------------- #Spieler Check
-if has_webhookurl and has_websiteurl and has_websiteauth then
-    if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
-        local db_player_check <const> = menu.list(menu.my_root(), "Spieler Check", {}, "")
-        menu.divider(db_player_check, "Spieler Check")
+        local db_player_check <const> = menu.list(menu.my_root(), "Spieler Suche", {}, "")
+        menu.divider(db_player_check, "Spieler Suche")
 
         ridrev = nil
         notizrev = nil
@@ -340,6 +313,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     if spectaterev != nil then menu.delete(spectaterev) end
                     if inviterev != nil then menu.delete(inviterev) end
                     if profilrev != nil then menu.delete(profilrev) end
+                    if updateref != nil then menu.delete(updateref) end
                     if deleteref != nil then menu.delete(deleteref) end
                 end
                 versuche = 0
@@ -368,6 +342,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     if spectaterev != nil then menu.delete(spectaterev) end
                     if inviterev != nil then menu.delete(inviterev) end
                     if profilrev != nil then menu.delete(profilrev) end
+                    if updateref != nil then menu.delete(updateref) end
                     if deleteref != nil then menu.delete(deleteref) end
                     if query == "" then return end
                 else
@@ -429,8 +404,11 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
                 divref2 = menu.divider(db_player_check, "Datenbank Optionen")
 
+                updateref = menu.action(db_player_check, "Eintrag updaten", {}, "Lässt dich den eintrag in der Datenbank updaten", function ()
+                end)
+
                 deleteref = menu.action(db_player_check, "Eintrag löschen", {}, "Löscht den Spieler aus der Datenbank", function ()
-                    if tostring(menu.get_activation_key_hash()) == athego then
+                    if tostring(script_user_name) == "BangerForLifeNLR" then
                         async_http.init(website_url, "/players/" .. db_id .. "/", function (body2, header2, status_code2)
                             if status_code2 ~= 204 then
                                 util.log(sprefix .. " Die website meldet Code: " .. status_code2)
@@ -438,15 +416,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                                 util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
                             end
                             menu.trigger_commands("name ")
-                            util.log(sprefix .. " Der Spieler wurde erfolgreich aus der Datenbank gelöscht")
-                            util.toast(sprefix .. " Der Spieler wurde erfolgreich aus der Datenbank gelöscht")
+                            util.log(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
+                            util.toast(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
                         end)
                         async_http.add_header("Authorization", website_auth)
                         async_http.set_method("DELETE")
                         async_http.dispatch()
                     else
                         util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
-                        util.log(sprefix .. " Dir fehlt die Berechtigung dafür!")
                     end
                 end)
 
@@ -880,6 +857,34 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
         menu.divider(menu.my_root(), "Skript Einstellungen") --Skript Einstellungen--
         local db_script_settings <const> = menu.list(menu.my_root(), "Skript Einstellungen" , {}, "") --Skript Einstellungen liste--
         menu.divider(db_script_settings, "Skript Einstellungen")
+
+        if has_webhookurl and has_websiteurl and has_websiteauth then
+            if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
+                menu.toggle(db_script_settings, "Datenbank Check", {"dbcheck"}, "Überprüft joinende Spieler ob sie in der Datenbank hinterlegt sind.", function(on)
+                    checkmodderdb = on
+                    if on then
+                        --instead of checking the log file, using this fancy way to listen for detections (Note: it won't include detections added by other scripts, such as JinxScript)--
+                        new_detection_handler = players.on_flow_event_done(function(pid, name, extra)
+                            name = lang.get_localised(name)
+                            if not name in detection_types then return end
+        
+                            if extra then
+                                name ..= $" ({extra})"
+                            end
+        
+                            if new_detection(pid, name) then
+                                send_to_webhook(pid, name, false, false)
+                            end
+                        end)
+                    end
+                    if not on then
+                        --stop the respective handlers--
+                        util.remove_handler(new_detection_handler)
+                    end
+                end, true)
+            end
+        end
+
         local db_auto_detections <const> = menu.list(db_script_settings, "Automatische Modder Erkennungen" , {}, "Hier kannst du einstellen welche Detections automatisch an die Datenbank übertragen werden. Die Liste wird mit der Zeit erweitert.") --Automatische Modder Erkennungen liste--
 
         menu.toggle(db_auto_detections, "Super Jump", {}, 'Aktiviert/Deaktiviert das Modder welche "Super Jump" triggern automatisch auf die Datenbank hinzugefügt werden.', function(on)
