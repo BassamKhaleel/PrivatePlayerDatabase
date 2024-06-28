@@ -9,7 +9,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.46)
+local localVer = tonumber(0.47)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -755,14 +755,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
                 if auto_kick_modders then
                     if psetstatus == 3 then
-                        host_position_int = 99
-                        host_position = players.get_host_queue_position(players.user()) -- 0 = Host
-                        host_position_int = tonumber(host_position)
-                        if host_position_int == 0 then
-                            menu.trigger_commands("ban" .. psetname)
-                        else
-                            menu.trigger_commands("kick" .. psetname)
-                        end
+                        menu.trigger_commands("kick" .. psetname)
                     end
                 end
 
@@ -1059,14 +1052,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
 
                     if auto_kick_modders then
-                        host_position_int = 99
-                        host_position = players.get_host_queue_position(players.user()) -- 0 = Host
-                        host_position_int = tonumber(host_position)
-                        if host_position_int == 0 then
-                            menu.trigger_commands("ban" .. psetname)
-                        else
-                            menu.trigger_commands("kick" .. psetname)
-                        end
+                        menu.trigger_commands("kick" .. psetname)
                     end
                 end
             end)
@@ -1127,14 +1113,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
 
                     if auto_kick_modders then
-                        host_position_int = 99
-                        host_position = players.get_host_queue_position(players.user()) -- 0 = Host
-                        host_position_int = tonumber(host_position)
-                        if host_position_int == 0 then
-                            menu.trigger_commands("ban" .. psetname)
-                        else
-                            menu.trigger_commands("kick" .. psetname)
-                        end
+                        menu.trigger_commands("kick" .. psetname)
                     end
                 end
             end)
@@ -1195,14 +1174,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
 
                     if auto_kick_modders then
-                        host_position_int = 99
-                        host_position = players.get_host_queue_position(players.user()) -- 0 = Host
-                        host_position_int = tonumber(host_position)
-                        if host_position_int == 0 then
-                            menu.trigger_commands("ban" .. playername)
-                        else
-                            menu.trigger_commands("kick" .. playername)
-                        end
+                        menu.trigger_commands("kick" .. playername)
                     end
                 end
             end)
@@ -1556,14 +1528,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
 
                     if auto_kick_modders then
-                        host_position_int = 99
-                        host_position = players.get_host_queue_position(players.user()) -- 0 = Host
-                        host_position_int = tonumber(host_position)
-                        if host_position_int == 0 then
-                            menu.trigger_commands("ban" .. playername)
-                        else
-                            menu.trigger_commands("kick" .. playername)
-                        end
+                        menu.trigger_commands("kick" .. playername)
                     end
                 end
             end)
