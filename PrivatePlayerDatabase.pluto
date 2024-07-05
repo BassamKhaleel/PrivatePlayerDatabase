@@ -9,17 +9,19 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.48)
+local localVer = tonumber(0.49)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
     if localVer ~= currentVer then
         util.toast(sprefix .. " Version " .. currentVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
-        menu.action(menu.my_root(), "Skript Updaten", {}, "", function()
+        util.log(sprefix .. " Version " .. currentVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
+        menu.action(menu.my_root(), "Skript Aktualisieren", {}, "", function()
             async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
                 local err = select(2,load(a))
                 if err then
-                    util.toast(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.")
+                    if critical_notification then util.toast(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.") end
+                    util.log(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.")
                 return end
                 local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
                 f:write(a)
@@ -55,6 +57,12 @@ modders_in_db = 0
 tryhards_in_db = 0
 freunde_in_db = 0
 streamer_in_db = 0
+
+--variablen für die benachrichtung einstellungen--
+critical_notification = true
+
+--variablen für die log einstellungen--
+db_check_log = true
 
 --variablen für die automatische modder erkennung--
 report_modded_explo = true
@@ -110,7 +118,7 @@ end
 
 --Checkt ob der Spieler dem Skript Internetzugang elaubt
 if not NetAccess then
-    util.toast(sprefix .. ' Deaktiviere "Internetzugang deaktivieren" um Zugang zu allen Funktionen zu erhalten.')
+    if critical_notification then util.toast(sprefix .. ' Deaktiviere "Internetzugang deaktivieren" um Zugang zu allen Funktionen zu erhalten.') end
     util.log(sprefix .. ' Dem Skript wurde der Internetzugang nicht gestattet. Der Spieler wurde informiert die Option "Internetzugang deaktivieren" zu deaktivieren.')
     menu.divider(menu.my_root(), 'Deaktiviere "Internetzugang deaktivieren"')
     menu.divider(menu.my_root(), 'um Zugang zu allen Funktionen zu erhalten.')
@@ -134,6 +142,7 @@ function write_url_to_file(file_path, webhook_url)
     file:write(webhook_url)
     file:close()
     util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
+    util.log(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
     util.restart_script()
 end
 
@@ -144,7 +153,7 @@ file:close()
 
 --Wenn die URL nicht mit "/api" und auch nicht mit "https://discord.com/api/webhooks" beginnt, wird die eingabe gelöscht.
 if string.len(webhook_url) > 0 and not string.startswith(webhook_url, "/api/webhooks/1121365184192188476/") and not string.startswith(webhook_url, "https://discord.com/api/webhooks/1121365184192188476/") then
-    util.toast(sprefix .. " Das scheint nicht die gültige Webhook zu sein,\nEingabe wird gelöscht")
+    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige Webhook zu sein,\nEingabe wird gelöscht") end
     local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
     file:close()
 end
@@ -163,7 +172,7 @@ if string.len(webhook_url) == 0 then
             write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", webhook_url)
             util.restart_script()
         else
-            util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://discord.com/api/webhooks' oder '/api/webhooks' beginnt.")
+            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://discord.com/api/webhooks' oder '/api/webhooks' beginnt.") end
         end
     end)
 else
@@ -207,7 +216,7 @@ if string.len(website_url) == 0 then
             write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", website_url)
             util.restart_script()
         else
-            util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://nolimit' beginnt.")
+            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://nolimit' beginnt.") end
         end
     end)
 else
@@ -251,7 +260,7 @@ if string.len(website_auth) == 0 then
             write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", website_auth)
             util.restart_script()
         else
-            util.toast(sprefix .. " Ungültiger Key stelle sicher, dass er mit: 'Basic' beginnt.")
+            if critical_notification then util.toast(sprefix .. " Ungültiger Key stelle sicher, dass er mit: 'Basic' beginnt.") end
         end
     end)
 else
@@ -919,6 +928,26 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             end
         end, true)
 
+        local db_notification_settings <const> = menu.list(db_script_settings, "Skript Benachrichtigungen" , {}, "Hier kannst du einstellen welche Benachrichtigungen du aktiviert haben willst.") --Skript Benachrichtigungen Einstellungen liste--
+
+        menu.toggle(db_notification_settings, "Kritische Benachrichtigungen", {}, 'Ist diese Funktion aktiviert erhältst du bei kritschen Fehlern eine Benachrichtigung.', function(on)
+            if on then
+                critical_notification = true
+            else
+                critical_notification = false
+            end
+        end, true)
+
+        local db_log_settings <const> = menu.list(db_script_settings, "Skript Logs" , {}, "Hier kannst du einstellen welche Logs du aktiviert haben willst.") --Skript Log Einstellungen liste--
+
+        menu.toggle(db_log_settings, "Spieler Überprüfungen", {"dbchecklog"}, 'Ist diese Funktion aktiviert schreibt Stand bei jedem neuen Spieler einen Log falls dieser erfolgreich überprüft wurde.', function(on)
+            if on then
+                db_check_log = true
+            else
+                db_check_log = false
+            end
+        end, true)
+
         menu.divider(menu.my_root(), "Zusatz") -- Skript Einstellungen--
         local db_statistik <const> = menu.list(menu.my_root(), "Skript Statistiken" , {}, "") --Skript Statistiken liste--
         menu.divider(db_statistik, "Skript Statistiken")
@@ -977,7 +1006,9 @@ players.dispatch_on_join()
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------Webhook Einstellungen
 
 function send_to_webhook(pid, detection)
-    util.toast(detection)
+    if script_user_name == "BangerForLifeNLR" then
+        util.toast(detection)
+    end
     local author_name = ""
     local description = ""
 
@@ -1569,7 +1600,7 @@ players.on_join(function(pid)
     util.yield(400)
     async_http.init(website_url, "/players/?search_param=" .. query, function(body, header, status_code)
         players_checked = players_checked + 1
-        util.log(sprefix .. " Spieler " .. playername .. "(" .. playerid .. ") wurde überprüft. Damit wurden seit letztem Skript Start " .. players_checked .. " Spieler überprüft.")
+        if db_check_log then util.log(sprefix .. " Spieler " .. playername .. "(" .. playerid .. ") wurde erfolgreich überprüft.") end
         if status_code ~= 200 then
             util.log(sprefix .. " Die website meldet Code: " .. status_code)
             util.toast(sprefix .. " Die website meldet Code: " .. status_code)
