@@ -1,32 +1,35 @@
 ---@diagnostic disable: undefined-global, lowercase-global
 
 --gta native--
--- util.require_natives("natives-1672190175-uno") ALTE NATIVE VERSION
+local nativeFetchStartTime = util.current_time_millis()
 util.require_natives("3095a", "g")
+local nativeFetchEndTime = util.current_time_millis() - nativeFetchStartTime
+util.log($"[PrivatePlayerDatabase] Natives in {nativeFetchEndTime}ms gefunden")
 
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.49)
+local localVer = tonumber(0.50)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
-    if localVer ~= currentVer then
-        util.toast(sprefix .. " Version " .. currentVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
-        util.log(sprefix .. " Version " .. currentVer .. " von " .. SCRIPT_FILENAME .. " ist verfügbar. Bitte Update das Skript.")
+    if localVer ~= currentVer and SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
+        if normal_notification then util.toast($"{sprefix} Version {currentVer} von {SCRIPT_FILENAME} ist verfügbar. Bitte aktualisiere das Skript.") end
+        if normal_log then util.log($"{sprefix} Version {currentVer} von {SCRIPT_FILENAME} ist verfügbar. Bitte aktualisiere das Skript.") end
         menu.action(menu.my_root(), "Skript Aktualisieren", {}, "", function()
             async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
                 local err = select(2,load(a))
                 if err then
                     if critical_notification then util.toast(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.") end
-                    util.log(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.")
+                    if critical_log then util.log(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.") end
                 return end
                 local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
                 f:write(a)
                 f:close()
-                util.toast(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet")
+                if normal_notification then util.toast(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet") end
+                if normal_log then util.log(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet") end
                 util.restart_script()
             end)
             async_http.dispatch()
@@ -59,10 +62,13 @@ freunde_in_db = 0
 streamer_in_db = 0
 
 --variablen für die benachrichtung einstellungen--
+normal_notification = true
 critical_notification = true
 
 --variablen für die log einstellungen--
 db_check_log = true
+normal_log = true
+critical_log = true
 
 --variablen für die automatische modder erkennung--
 report_modded_explo = true
@@ -116,10 +122,12 @@ local function SessionType()
 return "[Story Mode]"
 end
 
+local featureCreateStartTime = util.current_time_millis()
+
 --Checkt ob der Spieler dem Skript Internetzugang elaubt
 if not NetAccess then
     if critical_notification then util.toast(sprefix .. ' Deaktiviere "Internetzugang deaktivieren" um Zugang zu allen Funktionen zu erhalten.') end
-    util.log(sprefix .. ' Dem Skript wurde der Internetzugang nicht gestattet. Der Spieler wurde informiert die Option "Internetzugang deaktivieren" zu deaktivieren.')
+    if critical_log then util.log(sprefix .. ' Deaktiviere "Internetzugang deaktivieren" um Zugang zu allen Funktionen zu erhalten.') end
     menu.divider(menu.my_root(), 'Deaktiviere "Internetzugang deaktivieren"')
     menu.divider(menu.my_root(), 'um Zugang zu allen Funktionen zu erhalten.')
 end
@@ -141,8 +149,8 @@ function write_url_to_file(file_path, webhook_url)
     local file = io.open(file_path, "w")
     file:write(webhook_url)
     file:close()
-    util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
-    util.log(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
+    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+    if normal_log then util.log(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
     util.restart_script()
 end
 
@@ -160,7 +168,7 @@ end
 
 --Wenn keine Webhook URL gesetzt ist wird eine neue Funktion hinzugefügt um die Webhook einzutragen--
 if string.len(webhook_url) == 0 then
-    util.toast(sprefix .. " Keine Webhook-URL gesetzt, setze diese mit der Option 'Webhook-URL einfügen'\nGib die Webhook-URL nicht weiter")
+    if critical_notification then util.toast(sprefix .. " Keine Webhook-URL gesetzt, setze diese mit der Option 'Webhook-URL einfügen'\nGib die Webhook-URL nicht weiter") end
     menu.action(menu.my_root(), "Webhook-URL einfügen", {"webhookurlsetzen"}, "!ACHTUNG!: Gib die Webhook-URL nicht weiter.\nHiermit wird die Webhook-URL in die Datei geschrieben.", function()
         menu.show_command_box("webhookurlsetzen ")
     end, function(webhook_url)
@@ -190,7 +198,7 @@ function write_url_to_file(file_path, website_url)
     local file = io.open(file_path, "w")
     file:write(website_url)
     file:close()
-    util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
+    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
     util.restart_script()
 end
 
@@ -201,14 +209,14 @@ file:close()
 
 --Wenn die Datenbank-URL nicht mit "https://nolimit" beginnt, wird die eingabe gelöscht
 if string.len(website_url) > 0 and not string.startswith(website_url, "https://nolimit") then
-    util.toast(sprefix .. " Das scheint nicht die gültige URL zu sein,\nEingabe wird gelöscht")
+    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige URL zu sein,\nEingabe wird gelöscht") end
     local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "w")
     file:close()
 end
 
 --Wenn keine Datenbank-URL gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
 if string.len(website_url) == 0 then
-    util.toast(sprefix .. " Keine Datenbank-URL gesetzt, setze diese mit der Option 'Datenbank-URL einfügen'\nGib die Datenbank-URL nicht weiter")
+    if normal_notification then util.toast(sprefix .. " Keine Datenbank-URL gesetzt, setze diese mit der Option 'Datenbank-URL einfügen'\nGib die Datenbank-URL nicht weiter") end
     menu.action(menu.my_root(), "Datenbank-URL einfügen", {"datenbankurlsetzen"}, "!ACHTUNG!: Gib die Datenbank-URL nicht weiter.\nHiermit wird die Datenbank-URL in die Datei geschrieben.", function()
         menu.show_command_box("datenbankurlsetzen ")
     end, function(website_url)
@@ -234,7 +242,7 @@ function write_url_to_file(file_path, website_auth)
     local file = io.open(file_path, "w")
     file:write(website_auth)
     file:close()
-    util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.")
+    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
     util.restart_script()
 end
 
@@ -634,13 +642,13 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
             async_http.init(website_url, "/players/?search_param=" .. tostring(psetrid), function(result, header, status_code)
                 if string.find(result, psetrid) then --Spieler ist bereits in der Datenbank--
-                    util.toast(sprefix .. " Spieler ist bereits in der Datenbank!")
+                    util.toast($"{sprefix} Der Spieler steht bereits in der Datenbank!")
                     menu.trigger_commands("suche " .. psetname)
                     menu.focus(namerev)
                     player_in_db = player_in_db + 1
                     util.toast(player_in_db)
                 else --Spieler ist noch nicht in der Datenbank wird aber an die Datenbank geschickt--
-                    player_in_db = player_in_db - player_in_db
+                    --player_in_db = player_in_db - player_in_db
                     local tabletest = {["name"] = tostring(psetname), ["rid"] = tonumber(psetrid), ["note"] = tostring(psetnotizcomplete), ["link"] = tostring(psetlink), ["status"] = tostring(psetstatusString)}
                     async_http.init(website_url, "/players/", function(body, header, status_code)
                         if status_code ~= 201 then --Wenn die Datenbank einen fehler meldet--
@@ -648,6 +656,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                             util.toast(sprefix .. " Die website meldet Code: " .. status_code)
                             util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
                         end
+                        players_reported = players_reported + 1
                         util.toast(sprefix .. " Spieler wurde erfolgreich auf die Datenbank übertragen.")
                         menu.trigger_commands("suche " .. psetname)
                         menu.focus(namerev)
@@ -759,12 +768,12 @@ end
 
 if has_webhookurl and has_websiteurl and has_websiteauth then
     if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
-        sessionhopper = menu.toggle_loop(menu.my_root(), "Session Hopper", {}, "Tritt alle 2 Minuten einer neuen Lobby bei um mögliche Modder zu sammeln und auf die Datenbank zu übertragen. Dies hilft besonders um Modder mit einem geänderten Host Token zu sammeln. Danke das du uns Hilfst Modder zu sammeln.", function(on)
-            while true do
-                menu.trigger_commands("go public")
-                util.yield(190000)
-            end
-        end)
+        --sessionhopper = menu.toggle_loop(menu.my_root(), "Session Hopper", {}, "Tritt alle 2 Minuten einer neuen Lobby bei um mögliche Modder zu sammeln und auf die Datenbank zu übertragen. Dies hilft besonders um Modder mit einem geänderten Host Token zu sammeln. Danke das du uns Hilfst Modder zu sammeln.", function(on)
+        --    while true do
+        --        menu.trigger_commands("go public")
+        --        util.yield(190000)
+        --    end
+        --end)
     end
 end
 
@@ -930,6 +939,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
         local db_notification_settings <const> = menu.list(db_script_settings, "Skript Benachrichtigungen" , {}, "Hier kannst du einstellen welche Benachrichtigungen du aktiviert haben willst.") --Skript Benachrichtigungen Einstellungen liste--
 
+        menu.toggle(db_notification_settings, "Normale Benachrichtigungen", {}, 'Ist diese Funktion aktiviert erhältst du normale Skript Benachrichtigungen.', function(on)
+            if on then
+                normal_notification = true
+            else
+                normal_notification = false
+            end
+        end, true)
+
         menu.toggle(db_notification_settings, "Kritische Benachrichtigungen", {}, 'Ist diese Funktion aktiviert erhältst du bei kritschen Fehlern eine Benachrichtigung.', function(on)
             if on then
                 critical_notification = true
@@ -963,11 +980,9 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 players_checked_div_stat = menu.divider(db_statistik, "Spieler überprüft: " .. players_checked)
                 players_reported_div_stat = menu.divider(db_statistik, "Spieler hinzugefügt: " .. players_reported)
                 players_in_db_div_stat = menu.divider(db_statistik, "Spieler bereits in der Datenbank: " .. players_in_db)
-            end
-
-            if statistiken_geladen == true then
-                util.toast(sprefix .. " Die Statistiken werden geladen")
-                util.log(sprefix .. " Die Statistiken werden geladen")
+            else
+                util.toast(sprefix .. " Die Statistiken werden aktualisiert")
+                util.log(sprefix .. " Die Statistiken werden aktualisiert")
                 util.yield(350)
                 menu.delete(first_div_stat)
                 menu.delete(players_checked_div_stat)
@@ -994,6 +1009,51 @@ local function player(pid) --Spieler Funktionen--
                 menu.trigger_commands("dbsetrid " .. playerid)
                 menu.focus(psetnotizpresetref)
             end)
+
+            player_test = menu.action(menu.player_root(pid), "Test", {}, "Test", function()
+                util.toast(tostring(detections_log))
+                util.toast(script_user_name)
+                util.toast(type(script_user_name))
+                --util.log(detections_log)
+                --util.toast(tostring(script_user_name))
+                --util.toast(script_user_name == "BangerForLifeNLR")
+                --menu.focus(menu.ref_by_path("Online>Player History>Apfelschorleee"))
+                --menu.focus(player_test)
+                --test = menu.ref_by_command_name("historynoteTudorFill")
+                --util.toast(tostring(test))
+                --util.log(tostring(test))
+                --value = menu.get_state(menu.ref_by_path("Online>Player History>TudorFill>Whitelist Join"))
+                --util.toast(value)
+                --time = math.random(500, 3000)
+                --util.toast(time)
+                --util.toast(menu.get_activation_key_hash())
+                --util.log(menu.get_activation_key_hash())
+                --local playername = players.get_name(pid)
+                --local playernameWithTags = players.get_name_with_tags(pid)
+                -- Players>BangerForLifeNLR />Information>Status>Health
+                -- local sessiontype = SessionType()
+                -- menu.ref_by_path("Online>Protections>Detections>Any Detection>Write To Log File")
+                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
+                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Test"))
+                --local health = menu.get_value(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
+                --util.toast(tostring(health))
+                -- local value2 = menu.get_value(menu.ref_by_command_name("historynote" .. playername))
+                -- util.toast(tostring(value2))
+                -- if not value2 == "Modder2" then
+                --     util.toast("Note lautete nicht Modder2")
+                -- else
+                --     util.toast("Note lautet Modder2")
+                -- end
+            end)
+
+            menu.action(menu.player_root(pid), "Menü Sprachen Check", {}, "Gibt die aktuelle Menü Sprache wieder", function ()
+                -- en = English (UK)
+                -- de = German - Deutsch
+                --local HistoryNote = menu.get_value(menu.ref_by_command_name("historynote KATApulTA228"))
+                local HistoryNote = menu.get_value(menu.ref_by_command_name("historynote" .. players.get_name(pid)))
+                util.toast(type(HistoryNote))
+                util.toast(HistoryNote)
+            end)
         else
             menu.divider(menu.player_root(pid), 'Deaktiviere "Internetzugang deaktivieren"')
             menu.divider(menu.player_root(pid), 'um Zugang zu allen Funktionen zu erhalten.')
@@ -1008,6 +1068,7 @@ players.dispatch_on_join()
 function send_to_webhook(pid, detection)
     if script_user_name == "BangerForLifeNLR" then
         util.toast(detection)
+        util.log(detection)
     end
     local author_name = ""
     local description = ""
@@ -1034,6 +1095,7 @@ function send_to_webhook(pid, detection)
         util.log(sprefix .. " [Automatische Modder Erkennung] " .. players.get_name(pid) .. "(" .. players.get_rockstar_id(pid) .. ") wurde wegen " .. detection .. " auf die Datenbank übertragen.")
 
         if string.find(detection, "Spoofed Host Token") then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Spoofed Host Token (" .. tostring(players.get_host_token_hex(pid)) .. " / " .. tostring(players.get_host_token(pid)) .. ") [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1051,7 +1113,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1086,7 +1147,6 @@ function send_to_webhook(pid, detection)
                     async_http.init("discord.com", webhook_url, function() end, function() end)
                     async_http.set_post("application/json", body)
                     async_http.dispatch()
-
                     if auto_kick_modders then
                         menu.trigger_commands("kick" .. psetname)
                     end
@@ -1094,7 +1154,9 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
+
         elseif string.find(detection, "Hidden From Player List") and report_hidden_from_playerlist then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Hidden From Player List [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1112,7 +1174,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1147,7 +1208,6 @@ function send_to_webhook(pid, detection)
                     async_http.init("discord.com", webhook_url, function() end, function() end)
                     async_http.set_post("application/json", body)
                     async_http.dispatch()
-
                     if auto_kick_modders then
                         menu.trigger_commands("kick" .. psetname)
                     end
@@ -1155,7 +1215,9 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
+
         elseif string.find(detection, "Explosion Blaming") then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = detection .. "[Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1173,7 +1235,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1208,7 +1269,6 @@ function send_to_webhook(pid, detection)
                     async_http.init("discord.com", webhook_url, function() end, function() end)
                     async_http.set_post("application/json", body)
                     async_http.dispatch()
-
                     if auto_kick_modders then
                         menu.trigger_commands("kick" .. playername)
                     end
@@ -1216,7 +1276,9 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
+
         elseif string.find(detection, "Damage Multiplier") and report_damage_multiplier then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Damage Multiplier [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1234,7 +1296,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1273,7 +1334,9 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
+
         elseif string.find(detection, "Super Jump") and report_super_jump then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Super Jump [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1291,7 +1354,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1330,11 +1392,11 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-        elseif string.find(detection, "Modded Driveby Weapon") then
 
+        elseif string.find(detection, "Modded Driveby Weapon") then
+            players_reported = players_reported + 1
             local mdw = detection
             local mdw2 = mdw:match("%((.-)%)%)")
-
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = mdw2 .. "[Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1352,7 +1414,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1391,11 +1452,11 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
-        elseif string.find(detection, "Modded Character Model") then
 
+        elseif string.find(detection, "Modded Character Model") then
+            players_reported = players_reported + 1
             local str = detection
             local str2 = str:match("%((.-%))%)")
-
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = str2 .. "[Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1413,7 +1474,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1452,7 +1512,9 @@ function send_to_webhook(pid, detection)
             end)
             async_http.add_header("Authorization", website_auth)
             async_http.dispatch()
+
         -- elseif string.find(detection, "Attacking While Invulnerable") or string.find(detection, "Angriff Wärend Unverwundbar") then
+        --     players_reported = players_reported + 1
         --     local playername = players.get_name(pid)
         --     local playerid = players.get_rockstar_id(pid)
         --     local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Attacking While Invulnerable (Godmode) [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1509,7 +1571,9 @@ function send_to_webhook(pid, detection)
         --     end)
         --     async_http.add_header("Authorization", website_auth)
         --     async_http.dispatch()
+
         elseif string.find(detection, "Modded Explosion") and report_modded_explo then
+            players_reported = players_reported + 1
             local playername = players.get_name(pid)
             local playerid = players.get_rockstar_id(pid)
             local tabletest = {["name"] = playername, ["rid"] = tostring(playerid), ["note"] = "Modded Explosion [Hinzugefügt von " .. script_user_name .. "]", ["link"] = "None", ["status"] = "Modder"}
@@ -1527,7 +1591,6 @@ function send_to_webhook(pid, detection)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", website_auth)
                     async_http.dispatch()
-
                     local body = [[
                         {
                             "embeds": [
@@ -1562,7 +1625,6 @@ function send_to_webhook(pid, detection)
                     async_http.init("discord.com", webhook_url, function() end, function() end)
                     async_http.set_post("application/json", body)
                     async_http.dispatch()
-
                     if auto_kick_modders then
                         menu.trigger_commands("kick" .. playername)
                     end
@@ -1600,19 +1662,22 @@ players.on_join(function(pid)
     util.yield(400)
     async_http.init(website_url, "/players/?search_param=" .. query, function(body, header, status_code)
         players_checked = players_checked + 1
-        if db_check_log then util.log(sprefix .. " Spieler " .. playername .. "(" .. playerid .. ") wurde erfolgreich überprüft.") end
         if status_code ~= 200 then
             util.log(sprefix .. " Die website meldet Code: " .. status_code)
             util.toast(sprefix .. " Die website meldet Code: " .. status_code)
             util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
         end
 
-        if string.find(body, "Modder") then
+        if db_check_log and status_code == 200 then util.log(sprefix .. " Spieler " .. playername .. "(" .. playerid .. ") wurde erfolgreich überprüft.") end
+
+        if string.find(body, "Modder") then --Falls ein Spieler joint und als Modder in der Datenbank steht--
             local valuetable = json.decode(body)
             local valuetable_url = valuetable[1].url
             local valuetable_note = valuetable[1].note
             local valuetable_status = valuetable[1].status
             util.toast(sprefix .. " Die Notiz für " .. playername .. " lautet: " .. valuetable_note)
+            util.toast(sprefix .. " Die Notiz für " .. playername .. " lautet: " .. valuetable_note)
+            util.toast(sprefix .. " " .. playername .. " steht als " .. valuetable_status .. " in der Datenbank.")
             util.toast(sprefix .. " " .. playername .. " steht als " .. valuetable_status .. " in der Datenbank.")
             --menu.trigger_commands("historyadd " .. playername)
             util.yield(1500)
@@ -1705,4 +1770,8 @@ menu.set_temporary(psetnotizpresetref)
 menu.set_temporary(psetnotizref)
 menu.set_temporary(psetlinkref)
 menu.set_temporary(psetstatusref)
-menu.set_temporary(sessionhopper)
+--menu.set_temporary(sessionhopper)
+
+local featureCreateEndTime = util.current_time_millis() - featureCreateStartTime
+util.log($"{sprefix} Funktionen in {featureCreateEndTime}ms erstellt")
+util.log($"{sprefix} Skript in {(nativeFetchEndTime + featureCreateEndTime)}ms geladen")
