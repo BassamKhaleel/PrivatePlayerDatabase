@@ -11,7 +11,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.50)
+local localVer = tonumber(0.501)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -338,116 +338,123 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             end
 
             async_http.init(website_url, "/players/?search_param=" .. query, function(body, header, status_code)
-                local valuetable = json.decode(body)
-                local valuetable_name = valuetable[1].name
-                local valuetable_url = valuetable[1].url
-                local valuetable_rid = valuetable[1].rid
-                local valuetable_note = valuetable[1].note
-                local valuetable_link = valuetable[1].link
-                local valuetable_status = valuetable[1].status
+                if tostring(body) ~= "[]" then
+                    local valuetable = json.decode(body)
+                    local valuetable_name = valuetable[1].name
+                    local valuetable_url = valuetable[1].url
+                    local valuetable_rid = valuetable[1].rid
+                    local valuetable_note = valuetable[1].note
+                    local valuetable_link = valuetable[1].link
+                    local valuetable_status = valuetable[1].status
 
-                if versuche!= 0 then
-                    if namerev2 != nil then menu.delete(namerev2) end
-                    if ridrev != nil then menu.delete(ridrev) end
-                    if notizrev != nil then menu.delete(notizrev) end
-                    if linkrev != nil then menu.delete(linkrev) end
-                    if statusrev != nil then menu.delete(statusrev) end
-                    if divref != nil then menu.delete(divref) end
-                    if divref2 != nil then menu.delete(divref2) end
-                    if divref3 != nil then menu.delete(divref3) end
-                    if joinrev != nil then menu.delete(joinrev) end
-                    if spectaterev != nil then menu.delete(spectaterev) end
-                    if inviterev != nil then menu.delete(inviterev) end
-                    if profilrev != nil then menu.delete(profilrev) end
-                    if updateref != nil then menu.delete(updateref) end
-                    if deleteref != nil then menu.delete(deleteref) end
-                    if query == "" then return end
-                else
-                    if query == "" then return end
-                end
-
-                versuche = versuche + 1
-                website_player_url = tostring(valuetable_url)
-
-                db_id = website_player_url:match("players/(%d+)")
-
-                divref3 = menu.divider(db_player_check, "Suchergebnis")
-
-                namerev2 = menu.action(db_player_check, "Name: " .. valuetable_name, {}, "", function ()
-                    util.copy_to_clipboard(tostring(valuetable_name))
-                end)
-
-                ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "", function ()
-                    util.copy_to_clipboard(tostring(valuetable_rid))
-                end)
-
-                if valuetable_note != nil then
-                    notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "", function ()
-                        util.copy_to_clipboard(tostring(valuetable_note))
-                    end)
-                else
-                    notizrev = nil
-                end
-
-                if valuetable_link != nil then
-                    linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "", function ()
-                        util.copy_to_clipboard(tostring(valuetable_link))
-                    end)
-                else
-                    linkrev = nil
-                end
-
-                statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "", function ()
-                    util.copy_to_clipboard(tostring(valuetable_status))
-                end)
-
-                divref = menu.divider(db_player_check, "Spieler Optionen")
-
-                joinrev = menu.action(db_player_check, "Spieler beitreten", {}, "Tritt dem Spieler bei wenn er Online ist", function ()
-                    menu.trigger_commands("ridjoin " .. valuetable_rid)
-                end)
-
-                spectaterev = menu.action(db_player_check, "Spieler zuschauen", {}, "Tritt dem Spieler bei und schaut ihm zu wenn er Online ist", function ()
-                    menu.trigger_commands("ridspectate " .. valuetable_rid)
-                end)
-
-                inviterev = menu.action(db_player_check, "Spieler einladen", {}, "Schickt dem Spieler eine Einladung in deine Lobby", function ()
-                    menu.trigger_commands("ridinvite " .. valuetable_rid)
-                end)
-
-                profilrev = menu.action(db_player_check, "Profil öffnen", {}, "Öffnet das Profil von dem Spieler", function ()
-                    menu.trigger_commands("ridprofile " .. valuetable_rid)
-                end)
-
-                divref2 = menu.divider(db_player_check, "Datenbank Optionen")
-
-                updateref = menu.action(db_player_check, "Eintrag updaten", {}, "Lässt dich den eintrag in der Datenbank updaten", function ()
-                end)
-
-                deleteref = menu.action(db_player_check, "Eintrag löschen", {}, "Löscht den Spieler aus der Datenbank", function ()
-                    if tostring(script_user_name) == "BangerForLifeNLR" then
-                        async_http.init(website_url, "/players/" .. db_id .. "/", function (body2, header2, status_code2)
-                            if status_code2 ~= 204 then
-                                util.log(sprefix .. " Die website meldet Code: " .. status_code2)
-                                util.toast(sprefix .. " Die website meldet Code: " .. status_code2)
-                                util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
-                            end
-                            menu.trigger_commands("name ")
-                            util.log(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
-                            util.toast(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
-                        end)
-                        async_http.add_header("Authorization", website_auth)
-                        async_http.set_method("DELETE")
-                        async_http.dispatch()
+                    if versuche!= 0 then
+                        if namerev2 != nil then menu.delete(namerev2) end
+                        if ridrev != nil then menu.delete(ridrev) end
+                        if notizrev != nil then menu.delete(notizrev) end
+                        if linkrev != nil then menu.delete(linkrev) end
+                        if statusrev != nil then menu.delete(statusrev) end
+                        if divref != nil then menu.delete(divref) end
+                        if divref2 != nil then menu.delete(divref2) end
+                        if divref3 != nil then menu.delete(divref3) end
+                        if joinrev != nil then menu.delete(joinrev) end
+                        if spectaterev != nil then menu.delete(spectaterev) end
+                        if inviterev != nil then menu.delete(inviterev) end
+                        if profilrev != nil then menu.delete(profilrev) end
+                        if updateref != nil then menu.delete(updateref) end
+                        if deleteref != nil then menu.delete(deleteref) end
+                        if query == "" then return end
                     else
-                        util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
+                        if query == "" then return end
                     end
-                end)
 
-                if status_code ~= 200 then
-                    util.log(sprefix .. " Die website meldet Code: " .. status_code)
-                    util.toast(sprefix .. " Die website meldet Code: " .. status_code)
-                    util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
+                    versuche = versuche + 1
+                    website_player_url = tostring(valuetable_url)
+
+                    db_id = website_player_url:match("players/(%d+)")
+
+                    divref3 = menu.divider(db_player_check, "Suchergebnis")
+
+                    namerev2 = menu.action(db_player_check, "Name: " .. valuetable_name, {}, "", function ()
+                        util.copy_to_clipboard(tostring(valuetable_name))
+                    end)
+
+                    ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "", function ()
+                        util.copy_to_clipboard(tostring(valuetable_rid))
+                    end)
+
+                    if valuetable_note != nil then
+                        notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "", function ()
+                            util.copy_to_clipboard(tostring(valuetable_note))
+                        end)
+                    else
+                        notizrev = nil
+                    end
+
+                    if valuetable_link != nil then
+                        linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "", function ()
+                            util.copy_to_clipboard(tostring(valuetable_link))
+                        end)
+                    else
+                        linkrev = nil
+                    end
+
+                    statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "", function ()
+                        util.copy_to_clipboard(tostring(valuetable_status))
+                    end)
+
+                    divref = menu.divider(db_player_check, "Spieler Optionen")
+
+                    joinrev = menu.action(db_player_check, "Spieler beitreten", {}, "Tritt dem Spieler bei wenn er Online ist", function ()
+                        menu.trigger_commands("ridjoin " .. valuetable_rid)
+                    end)
+
+                    spectaterev = menu.action(db_player_check, "Spieler zuschauen", {}, "Tritt dem Spieler bei und schaut ihm zu wenn er Online ist", function ()
+                        menu.trigger_commands("ridspectate " .. valuetable_rid)
+                    end)
+
+                    inviterev = menu.action(db_player_check, "Spieler einladen", {}, "Schickt dem Spieler eine Einladung in deine Lobby", function ()
+                        menu.trigger_commands("ridinvite " .. valuetable_rid)
+                    end)
+
+                    profilrev = menu.action(db_player_check, "Profil öffnen", {}, "Öffnet das Profil von dem Spieler", function ()
+                        menu.trigger_commands("ridprofile " .. valuetable_rid)
+                    end)
+
+                    divref2 = menu.divider(db_player_check, "Datenbank Optionen")
+
+                    updateref = menu.action(db_player_check, "Eintrag updaten", {}, "Lässt dich den eintrag in der Datenbank updaten", function ()
+                    end)
+
+                    deleteref = menu.action(db_player_check, "Eintrag löschen", {}, "Löscht den Spieler aus der Datenbank", function ()
+                        if tostring(script_user_name) == "BangerForLifeNLR" then
+                            async_http.init(website_url, "/players/" .. db_id .. "/", function (body2, header2, status_code2)
+                                if status_code2 ~= 204 then
+                                    util.log(sprefix .. " Die website meldet Code: " .. status_code2)
+                                    util.toast(sprefix .. " Die website meldet Code: " .. status_code2)
+                                    util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
+                                end
+                                menu.trigger_commands("name ")
+                                util.log(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
+                                util.toast(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
+                            end)
+                            async_http.add_header("Authorization", website_auth)
+                            async_http.set_method("DELETE")
+                            async_http.dispatch()
+                        else
+                            util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
+                        end
+                    end)
+
+                    if status_code ~= 200 then
+                        util.log(sprefix .. " Die website meldet Code: " .. status_code)
+                        util.toast(sprefix .. " Die website meldet Code: " .. status_code)
+                        util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
+                    end
+                else
+                    menu.trigger_commands("suche")
+                    util.yield(50)
+                    if critical_notification then util.toast($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
+                    if critical_log then util.log($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
                 end
             end)
             async_http.add_header("Authorization", website_auth)
