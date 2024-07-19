@@ -11,7 +11,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.501)
+local localVer = tonumber(0.502)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -49,7 +49,7 @@ script_user_name = players.get_name(players.user())
 report_to_dev = true
 
 --variable für diverse berechtigungen--
-athego = "-1339857870"
+athego_key_hash = "-1339857870"
 
 --statistik variablen--
 statistiken_geladen = false
@@ -378,12 +378,12 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         util.copy_to_clipboard(tostring(valuetable_name))
                     end)
 
-                    ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "", function ()
+                    ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "", function()
                         util.copy_to_clipboard(tostring(valuetable_rid))
                     end)
 
                     if valuetable_note != nil then
-                        notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "", function ()
+                        notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "", function()
                             util.copy_to_clipboard(tostring(valuetable_note))
                         end)
                     else
@@ -391,43 +391,92 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     end
 
                     if valuetable_link != nil then
-                        linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "", function ()
+                        linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "", function()
                             util.copy_to_clipboard(tostring(valuetable_link))
                         end)
                     else
                         linkrev = nil
                     end
 
-                    statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "", function ()
+                    statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "", function()
                         util.copy_to_clipboard(tostring(valuetable_status))
                     end)
 
                     divref = menu.divider(db_player_check, "Spieler Optionen")
 
-                    joinrev = menu.action(db_player_check, "Spieler beitreten", {}, "Tritt dem Spieler bei wenn er Online ist", function ()
+                    joinrev = menu.action(db_player_check, "Spieler beitreten", {}, "Tritt dem Spieler bei wenn er Online ist", function()
                         menu.trigger_commands("ridjoin " .. valuetable_rid)
                     end)
 
-                    spectaterev = menu.action(db_player_check, "Spieler zuschauen", {}, "Tritt dem Spieler bei und schaut ihm zu wenn er Online ist", function ()
+                    spectaterev = menu.action(db_player_check, "Spieler zuschauen", {}, "Tritt dem Spieler bei und schaut ihm zu wenn er Online ist", function()
                         menu.trigger_commands("ridspectate " .. valuetable_rid)
                     end)
 
-                    inviterev = menu.action(db_player_check, "Spieler einladen", {}, "Schickt dem Spieler eine Einladung in deine Lobby", function ()
+                    inviterev = menu.action(db_player_check, "Spieler einladen", {}, "Schickt dem Spieler eine Einladung in deine Lobby", function()
                         menu.trigger_commands("ridinvite " .. valuetable_rid)
                     end)
 
-                    profilrev = menu.action(db_player_check, "Profil öffnen", {}, "Öffnet das Profil von dem Spieler", function ()
+                    profilrev = menu.action(db_player_check, "Profil öffnen", {}, "Öffnet das Profil von dem Spieler", function()
                         menu.trigger_commands("ridprofile " .. valuetable_rid)
                     end)
 
                     divref2 = menu.divider(db_player_check, "Datenbank Optionen")
 
-                    updateref = menu.action(db_player_check, "Eintrag updaten", {}, "Lässt dich den eintrag in der Datenbank updaten", function ()
+                    updateref = menu.action(db_player_check, "Eintrag updaten", {}, "Lässt dich den eintrag in der Datenbank updaten", function()
+                        if tostring(menu.get_activation_key_hash()) ~= athego_key_hash then
+                            util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
+                        else
+                            local db_status_codes2 = {
+                                "--PLATZHALTER--",
+                                "Freund",
+                                "Modder",
+                                "Streamer",
+                                "TryHard"
+                            }
+                            spieler_updaten_list = menu.list(menu.my_root(), "Eintrag updaten", {}, "")
+                            spieler_updaten_div = menu.divider(spieler_updaten_list, "Eintrag updaten")
+                            menu.focus(spieler_updaten_div)
+                            util.copy_to_clipboard(tostring(valuetable_note))
+                            spieler_updaten_name = menu.action(spieler_updaten_list, "Name: " .. valuetable_name, {}, "", function() end)
+                            spieler_updaten_rid = menu.action(spieler_updaten_list, "RID: " .. valuetable_rid, {}, "", function() end)
+                            spieler_updaten_notiz = menu.text_input(spieler_updaten_list, "Notiz ", {"nnotiz"}, "Falls du die alte Notiz behalten möchtest drücke strg+v", function(eunotiz)
+                                eunotiz = eunotiz
+                                util.show_corner_help("Falls du die alte Notiz behalten möchtest drücke strg+v")
+                            end)
+                            --spieler_updaten_link = menu.text_input(spieler_updaten_list, "Link", {'eusetlink'}, "Gib den Link für den Spieler ein", function(link)
+                            --    eusetlink = link
+                            --end)
+                            spieler_updaten_status = menu.list_select(spieler_updaten_list, "Status", {}, "Gib den Status für den Spieler an", db_status_codes2, 1, function(eustatus)
+                                eustatus = eustatus
+                            end)
+                            spieler_updaten_div2 = menu.divider(spieler_updaten_list, "Eintrag senden")
+                            spieler_updaten_senden = menu.action(spieler_updaten_list, "Eintrag updaten", {}, "Sendet den aktualisierten Eintrag an die Datenbank", function()
+                                local eutable = {["name"] = tostring(valuetable_name), ["rid"] = tonumber(valuetable_rid), ["note"] = tostring(eunotiz), ["link"] = tostring(valuetable_link), ["status"] = tostring(eustatus)}
+                                if tostring(menu.get_activation_key_hash()) == athego_key_hash then
+                                    async_http.init(website_url, "/players/" .. db_id .. "/", function(body3, header3, status_code3)
+                                        if status_code2 ~= 204 then
+                                            util.log(sprefix .. " Die website meldet Code: " .. status_code3)
+                                            util.toast(sprefix .. " Die website meldet Code: " .. status_code3)
+                                            util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
+                                            return
+                                        end
+                                        util.log(sprefix .. " Der Eintrag für den Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aktualisiert")
+                                        util.toast(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aktualisiert")
+                                    end)
+                                    async_http.set_method("UPDATE")
+                                    async_http.set_post("application/json", json.encode(eutable))
+                                    async_http.add_header("Authorization", website_auth)
+                                    async_http.dispatch()
+                                else
+                                    util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
+                                end
+                            end)
+                        end
                     end)
 
-                    deleteref = menu.action(db_player_check, "Eintrag löschen", {}, "Löscht den Spieler aus der Datenbank", function ()
-                        if tostring(script_user_name) == "BangerForLifeNLR" then
-                            async_http.init(website_url, "/players/" .. db_id .. "/", function (body2, header2, status_code2)
+                    deleteref = menu.action(db_player_check, "Eintrag löschen", {}, "Löscht den Spieler aus der Datenbank", function()
+                        if tostring(menu.get_activation_key_hash()) == athego_key_hash then
+                            async_http.init(website_url, "/players/" .. db_id .. "/", function(body2, header2, status_code2)
                                 if status_code2 ~= 204 then
                                     util.log(sprefix .. " Die website meldet Code: " .. status_code2)
                                     util.toast(sprefix .. " Die website meldet Code: " .. status_code2)
@@ -453,8 +502,8 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 else
                     menu.trigger_commands("suche")
                     util.yield(50)
-                    if critical_notification then util.toast($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
-                    if critical_log then util.log($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
+                    if normal_notification then util.toast($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
+                    if normal_log then util.log($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
                 end
             end)
             async_http.add_header("Authorization", website_auth)
@@ -1016,51 +1065,6 @@ local function player(pid) --Spieler Funktionen--
                 menu.trigger_commands("dbsetrid " .. playerid)
                 menu.focus(psetnotizpresetref)
             end)
-
-            player_test = menu.action(menu.player_root(pid), "Test", {}, "Test", function()
-                util.toast(tostring(detections_log))
-                util.toast(script_user_name)
-                util.toast(type(script_user_name))
-                --util.log(detections_log)
-                --util.toast(tostring(script_user_name))
-                --util.toast(script_user_name == "BangerForLifeNLR")
-                --menu.focus(menu.ref_by_path("Online>Player History>Apfelschorleee"))
-                --menu.focus(player_test)
-                --test = menu.ref_by_command_name("historynoteTudorFill")
-                --util.toast(tostring(test))
-                --util.log(tostring(test))
-                --value = menu.get_state(menu.ref_by_path("Online>Player History>TudorFill>Whitelist Join"))
-                --util.toast(value)
-                --time = math.random(500, 3000)
-                --util.toast(time)
-                --util.toast(menu.get_activation_key_hash())
-                --util.log(menu.get_activation_key_hash())
-                --local playername = players.get_name(pid)
-                --local playernameWithTags = players.get_name_with_tags(pid)
-                -- Players>BangerForLifeNLR />Information>Status>Health
-                -- local sessiontype = SessionType()
-                -- menu.ref_by_path("Online>Protections>Detections>Any Detection>Write To Log File")
-                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
-                --menu.focus(menu.ref_by_path("Players>" .. playernameWithTags .. ">Test"))
-                --local health = menu.get_value(menu.ref_by_path("Players>" .. playernameWithTags .. ">Information>Status>Health"))
-                --util.toast(tostring(health))
-                -- local value2 = menu.get_value(menu.ref_by_command_name("historynote" .. playername))
-                -- util.toast(tostring(value2))
-                -- if not value2 == "Modder2" then
-                --     util.toast("Note lautete nicht Modder2")
-                -- else
-                --     util.toast("Note lautet Modder2")
-                -- end
-            end)
-
-            menu.action(menu.player_root(pid), "Menü Sprachen Check", {}, "Gibt die aktuelle Menü Sprache wieder", function ()
-                -- en = English (UK)
-                -- de = German - Deutsch
-                --local HistoryNote = menu.get_value(menu.ref_by_command_name("historynote KATApulTA228"))
-                local HistoryNote = menu.get_value(menu.ref_by_command_name("historynote" .. players.get_name(pid)))
-                util.toast(type(HistoryNote))
-                util.toast(HistoryNote)
-            end)
         else
             menu.divider(menu.player_root(pid), 'Deaktiviere "Internetzugang deaktivieren"')
             menu.divider(menu.player_root(pid), 'um Zugang zu allen Funktionen zu erhalten.')
@@ -1073,7 +1077,7 @@ players.dispatch_on_join()
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------Webhook Einstellungen
 
 function send_to_webhook(pid, detection)
-    if script_user_name == "BangerForLifeNLR" then
+    if tostring(menu.get_activation_key_hash()) == athego_key_hash then
         util.toast(detection)
         util.log(detection)
     end
@@ -1649,7 +1653,7 @@ end
 
 players.on_join(function(pid)
 
-    if not menu.is_open() then --Falls stand geöffnet ist leert es die suche nicht um zu verhindern das die suche geleert wird während man stand benutzt--
+    if not menu.is_open() or menu.is_focused(namerev) == false then --Falls stand geöffnet ist leert es die suche nicht um zu verhindern das die suche geleert wird während man stand benutzt--
         menu.trigger_commands("suche") --Leert die Suche um fehler beim stoppen des skripts zu verhindern--
     end
 
