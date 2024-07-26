@@ -11,7 +11,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.502)
+local localVer = tonumber(0.51)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -330,6 +330,9 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     if spectaterev != nil then menu.delete(spectaterev) end
                     if inviterev != nil then menu.delete(inviterev) end
                     if profilrev != nil then menu.delete(profilrev) end
+                    if historyviewrev != nil then menu.delete(historyviewrev) end
+                    if scblockrev != nil then menu.delete(scblockrev) end
+                    if scunblockrev != nil then menu.delete(scunblockrev) end
                     if updateref != nil then menu.delete(updateref) end
                     if deleteref != nil then menu.delete(deleteref) end
                 end
@@ -360,6 +363,9 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         if spectaterev != nil then menu.delete(spectaterev) end
                         if inviterev != nil then menu.delete(inviterev) end
                         if profilrev != nil then menu.delete(profilrev) end
+                        if historyviewrev != nil then menu.delete(historyviewrev) end
+                        if scblockrev != nil then menu.delete(scblockrev) end
+                        if scunblockrev != nil then menu.delete(scunblockrev) end
                         if updateref != nil then menu.delete(updateref) end
                         if deleteref != nil then menu.delete(deleteref) end
                         if query == "" then return end
@@ -374,16 +380,16 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
                     divref3 = menu.divider(db_player_check, "Suchergebnis")
 
-                    namerev2 = menu.action(db_player_check, "Name: " .. valuetable_name, {}, "", function ()
+                    namerev2 = menu.action(db_player_check, "Name: " .. valuetable_name, {}, "Namen kopieren", function ()
                         util.copy_to_clipboard(tostring(valuetable_name))
                     end)
 
-                    ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "", function()
+                    ridrev = menu.action(db_player_check, "RID: " .. valuetable_rid, {}, "RID kopieren", function()
                         util.copy_to_clipboard(tostring(valuetable_rid))
                     end)
 
                     if valuetable_note != nil then
-                        notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "", function()
+                        notizrev = menu.action(db_player_check, "Notiz: " .. valuetable_note, {}, "Notiz kopieren", function()
                             util.copy_to_clipboard(tostring(valuetable_note))
                         end)
                     else
@@ -391,14 +397,14 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     end
 
                     if valuetable_link != nil then
-                        linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "", function()
+                        linkrev = menu.action(db_player_check, "Link: " .. valuetable_link, {}, "Link kopieren", function()
                             util.copy_to_clipboard(tostring(valuetable_link))
                         end)
                     else
                         linkrev = nil
                     end
 
-                    statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "", function()
+                    statusrev = menu.action(db_player_check, "Status: " .. valuetable_status, {}, "Status kopieren", function()
                         util.copy_to_clipboard(tostring(valuetable_status))
                     end)
 
@@ -418,6 +424,32 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
 
                     profilrev = menu.action(db_player_check, "Profil öffnen", {}, "Öffnet das Profil von dem Spieler", function()
                         menu.trigger_commands("ridprofile " .. valuetable_rid)
+                    end)
+
+                    historyviewrev = menu.action(db_player_check, "Spieler History", {}, "Öffnet den Spieler in Stand's Spieler History", function()
+                        menu.trigger_commands("historyadd " .. valuetable_name)
+                    end)
+
+                    scblockrev = menu.action(db_player_check, "Spieler blockieren", {}, "Blockiert den Spieler im SocialClub", function()
+                        if util.sc_is_blocked(tonumber(valuetable_rid)) then
+                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
+                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
+                        else
+                            util.sc_block(tonumber(valuetable_rid))
+                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
+                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
+                        end
+                    end)
+
+                    scunblockrev = menu.action(db_player_check, "Spieler entblocken", {}, "Entblockt den Spieler im SocialClub", function()
+                        if not util.sc_is_blocked(tonumber(valuetable_rid)) then
+                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
+                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
+                        else
+                            util.sc_unblock(tonumber(valuetable_rid))
+                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
+                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
+                        end
                     end)
 
                     divref2 = menu.divider(db_player_check, "Datenbank Optionen")
