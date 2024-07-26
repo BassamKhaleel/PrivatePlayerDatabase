@@ -11,7 +11,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.51)
+local localVer = tonumber(0.511)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -373,6 +373,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         if query == "" then return end
                     end
 
+                    is_blocked = util.sc_is_blocked(tonumber(valuetable_rid))
                     versuche = versuche + 1
                     website_player_url = tostring(valuetable_url)
 
@@ -430,27 +431,29 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         menu.trigger_commands("historyadd " .. valuetable_name)
                     end)
 
-                    scblockrev = menu.action(db_player_check, "Spieler blockieren", {}, "Blockiert den Spieler im SocialClub", function()
-                        if util.sc_is_blocked(tonumber(valuetable_rid)) then
-                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
-                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
-                        else
-                            util.sc_block(tonumber(valuetable_rid))
-                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
-                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
-                        end
-                    end)
-
-                    scunblockrev = menu.action(db_player_check, "Spieler entblocken", {}, "Entblockt den Spieler im SocialClub", function()
-                        if not util.sc_is_blocked(tonumber(valuetable_rid)) then
-                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
-                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
-                        else
-                            util.sc_unblock(tonumber(valuetable_rid))
-                            if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
-                            if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
-                        end
-                    end)
+                    if not is_blocked then
+                        scblockrev = menu.action(db_player_check, "Spieler blockieren", {}, "Blockiert den Spieler im SocialClub", function()
+                            if util.sc_is_blocked(tonumber(valuetable_rid)) then
+                                if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
+                                if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist bereits blockiert.") end
+                            else
+                                util.sc_block(tonumber(valuetable_rid))
+                                if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
+                                if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich blockiert.") end
+                            end
+                        end)
+                    else
+                        scunblockrev = menu.action(db_player_check, "Spieler entblocken", {}, "Entblockt den Spieler im SocialClub", function()
+                            if not util.sc_is_blocked(tonumber(valuetable_rid)) then
+                                if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
+                                if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") ist nicht blockiert.") end
+                            else
+                                util.sc_unblock(tonumber(valuetable_rid))
+                                if normal_notification then util.toast(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
+                                if normal_log then util.log(sprefix .. " Der Spieler (" .. valuetable_name .. ") wurde erfolgreich entblockt.") end
+                            end
+                        end)
+                    end
 
                     divref2 = menu.divider(db_player_check, "Datenbank Optionen")
 
