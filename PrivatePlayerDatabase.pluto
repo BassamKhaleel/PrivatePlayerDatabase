@@ -11,7 +11,7 @@ sprefix = "[PrivatePlayerDatabase]"
 
 --Version Check / Auto Updater
 local response = false
-local localVer = tonumber(0.511)
+local localVer = tonumber(0.52)
 async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
     currentVer = tonumber(output)
     response = true
@@ -130,6 +130,13 @@ if not NetAccess then
     if critical_log then util.log(sprefix .. ' Deaktiviere "Internetzugang deaktivieren" um Zugang zu allen Funktionen zu erhalten.') end
     menu.divider(menu.my_root(), 'Deaktiviere "Internetzugang deaktivieren"')
     menu.divider(menu.my_root(), 'um Zugang zu allen Funktionen zu erhalten.')
+end
+
+if NetAccess then
+    -- Einmalige Benutzer Tracking Start
+    async_http.init('pastebin.com', 'peqtbvYn', function() end)
+    async_http.dispatch()
+    -- Einmalige Benutzer Tracking Ende
 end
 
 --Erstellt einen Ordner unter Stand\Lua Scripts\store
@@ -1085,6 +1092,9 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 players_in_db_div_stat = menu.divider(db_statistik, "Spieler bereits in der Datenbank: " .. players_in_db)
             end
         end)
+
+        menu.hyperlink(menu.my_root(), "Discord", "https://discord.gg/nUpySqMV", "Tritt dem Discord bei, um Neuigkeiten über alle aktuellen und kommenden Updates zu erfahren.")
+
     end
 end
 
@@ -1116,6 +1126,8 @@ function send_to_webhook(pid, detection)
         util.toast(detection)
         util.log(detection)
     end
+    util.toast(detection)
+    util.log(detection)
     local author_name = ""
     local description = ""
 
