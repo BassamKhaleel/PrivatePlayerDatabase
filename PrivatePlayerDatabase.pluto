@@ -954,6 +954,18 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
         local db_script_settings <const> = menu.list(menu.my_root(), "Skript Einstellungen" , {}, "") --Skript Einstellungen liste--
         menu.divider(db_script_settings, "Skript Einstellungen")
 
+        if NetAccess then
+            menu.action(db_script_settings, "Aktualisieren", {}, "Das Skript sucht alle 2 Stunden automatisch nach Updates, aber du kannst auch manuell nach Updates suchen.", function()
+                if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
+                    auto_update_config.check_interval = 0
+                    util.toast(sprefix .. " Suche nach Update")
+                    auto_updater.run_auto_update(auto_update_config)
+                else
+                    util.toast(sprefix .. " Die Dev Version unterstützt Automatische Updates nicht.")
+                end
+            end)
+        end
+
         if has_webhookurl and has_websiteurl and has_websiteauth then
             if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
                 menu.toggle(db_script_settings, "Datenbank Check", {"dbcheck"}, "Überprüft joinende Spieler ob sie in der Datenbank hinterlegt sind.", function(on)
