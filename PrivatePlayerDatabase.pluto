@@ -3,43 +3,23 @@
 --gta native--
 local nativeFetchStartTime = util.current_time_millis()
 util.require_natives("3095a", "g")
+util.ensure_package_is_installed("lua/auto-updater")
+local auto_updater = require("auto-updater")
 local nativeFetchEndTime = util.current_time_millis() - nativeFetchStartTime
 util.log($"[PrivatePlayerDatabase] Natives in {nativeFetchEndTime}ms gefunden")
 
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
 
---Version Check / Auto Updater
-local response = false
-local localVer = tonumber(0.52)
-async_http.init("raw.githubusercontent.com", "/BassamKhaleel/PrivatePlayerDatabase/main/VersionCheck", function(output)
-    currentVer = tonumber(output)
-    response = true
-    if localVer ~= currentVer and SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
-        if normal_notification then util.toast($"{sprefix} Version {currentVer} von {SCRIPT_FILENAME} ist verfügbar. Bitte aktualisiere das Skript.") end
-        if normal_log then util.log($"{sprefix} Version {currentVer} von {SCRIPT_FILENAME} ist verfügbar. Bitte aktualisiere das Skript.") end
-        menu.action(menu.my_root(), "Skript Aktualisieren", {}, "", function()
-            async_http.init('raw.githubusercontent.com','/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto',function(a)
-                local err = select(2,load(a))
-                if err then
-                    if critical_notification then util.toast(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.") end
-                    if critical_log then util.log(sprefix .. " Fehler beim Updaten. Probiere es später erneut. Sollte der Fehler weiterhin auftreten Update das Skript Manuell über GitHub.") end
-                return end
-                local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
-                f:write(a)
-                f:close()
-                if normal_notification then util.toast(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet") end
-                if normal_log then util.log(sprefix .. " Erfolgreich aktualisiert. Das Skript wird Automatisch neugestartet") end
-                util.restart_script()
-            end)
-            async_http.dispatch()
-        end)
-    end
-end, function() response = true end)
-async_http.dispatch()
-repeat 
-    util.yield()
-until response
+--Auto Updater
+if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
+    auto_updater.run_auto_update({
+        source_url="https://raw.githubusercontent.com/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto",
+        script_relpath=SCRIPT_RELPATH,
+        check_interval=7200,
+        silent_updates=true,
+    })
+end
 
 --json--
 json = require("json")
