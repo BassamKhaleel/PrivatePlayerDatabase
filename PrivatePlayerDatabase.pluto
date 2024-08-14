@@ -42,7 +42,6 @@ if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
         silent_updates=true,
         dependencies={
             "store/PrivatePlayerDatabase/webhook_url.txt",
-            "store/PrivatePlayerDatabase/website_auth.txt",
             "store/PrivatePlayerDatabase/website_url.txt",
         },
     })
