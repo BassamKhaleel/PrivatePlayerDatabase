@@ -10,6 +10,7 @@ util.log($"[PrivatePlayerDatabase] Natives in {nativeFetchEndTime}ms gefunden")
 
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
+sversion = "0.5.4"
 
 --Auto Updater
 if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
@@ -18,6 +19,11 @@ if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
         script_relpath=SCRIPT_RELPATH,
         check_interval=600,
         silent_updates=true,
+        dependencies={
+            "store/PrivatePlayerDatabase/webhook_url.txt",
+            "store/PrivatePlayerDatabase/website_auth.txt",
+            "store/PrivatePlayerDatabase/website_url.txt",
+        },
     })
 end
 
@@ -120,26 +126,33 @@ if NetAccess then
 end
 
 --Erstellt einen Ordner unter Stand\Lua Scripts\store
-if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase") then
-    filesystem.mkdir(filesystem.store_dir() .. "\\PrivatePlayerDatabase")
-end
+--if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase") then
+--    filesystem.mkdir(filesystem.store_dir() .. "\\PrivatePlayerDatabase")
+--end
 
 --Webhook URL
 --Erstellt die txt für die Webhook URL
-if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt") then
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
-    file:close()
-end
+--if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt") then
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
+--    file:close()
+--end
 
 --Schreibt die Webhook in die vorgesehene Datei
-function write_url_to_file(file_path, webhook_url)
-    local file = io.open(file_path, "w")
-    file:write(webhook_url)
-    file:close()
-    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
-    if normal_log then util.log(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
-    util.restart_script()
-end
+--function write_url_to_file(file_path, webhook_url)
+--local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "r")
+--local webhook_url_check = file:read("a")
+--util.toast(webhook_url_check)
+--file:close()
+--if not string.startswith(webhook_url_check, "https://discord.com/api/webhooks/1273205845529989131/6pH") then
+    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
+--    file:write("https://discord.com/api/webhooks/1273205845529989131/6pH_F4TykaZ92_pV10-MqvK6oR5m3a44E0XKcQmw4M66yey_E9f_Ah4JY7CJK4wO7tvn")
+--    file:close()
+--    util.yield(50)
+--    util.toast(string.startswith(webhook_url_check, "https://discord.com/api/webhooks/1273205845529989131/6pH"))
+--    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+--    if normal_log then util.log(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+    --util.restart_script()
+--end
 
 --Holt sich die Webhook aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "r")
@@ -147,47 +160,47 @@ local webhook_url = file:read("a")
 file:close()
 
 --Wenn die URL nicht mit "/api" und auch nicht mit "https://discord.com/api/webhooks" beginnt, wird die eingabe gelöscht.
-if string.len(webhook_url) > 0 and not string.startswith(webhook_url, "/api/webhooks/1121365184192188476/") and not string.startswith(webhook_url, "https://discord.com/api/webhooks/1121365184192188476/") then
-    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige Webhook zu sein,\nEingabe wird gelöscht") end
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
-    file:close()
-end
+--if string.len(webhook_url) > 0 and not string.startswith(webhook_url, "/api/webhooks/1121365184192188476/") and not string.startswith(webhook_url, "https://discord.com/api/webhooks/1121365184192188476/") then
+--    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige Webhook zu sein,\nEingabe wird gelöscht") end
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "w")
+--    file:close()
+--end
 
 --Wenn keine Webhook URL gesetzt ist wird eine neue Funktion hinzugefügt um die Webhook einzutragen--
-if string.len(webhook_url) == 0 then
-    if critical_notification then util.toast(sprefix .. " Keine Webhook-URL gesetzt, setze diese mit der Option 'Webhook-URL einfügen'\nGib die Webhook-URL nicht weiter") end
-    menu.action(menu.my_root(), "Webhook-URL einfügen", {"webhookurlsetzen"}, "!ACHTUNG!: Gib die Webhook-URL nicht weiter.\nHiermit wird die Webhook-URL in die Datei geschrieben.", function()
-        menu.show_command_box("webhookurlsetzen ")
-    end, function(webhook_url)
-        if string.startswith(webhook_url, "/api") then
-            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", webhook_url)
-            util.restart_script()
-        elseif string.startswith(webhook_url, "https://discord.com/api/webhooks") then
-            webhook_url = string.sub(webhook_url, string.lfind(webhook_url, "/api"))
-            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", webhook_url)
-            util.restart_script()
-        else
-            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://discord.com/api/webhooks' oder '/api/webhooks' beginnt.") end
-        end
-    end)
-else
-    has_webhookurl = true
-end
+--if string.len(webhook_url) == 0 then
+--    if critical_notification then util.toast(sprefix .. " Keine Webhook-URL gesetzt, setze diese mit der Option 'Webhook-URL einfügen'\nGib die Webhook-URL nicht weiter") end
+--    menu.action(menu.my_root(), "Webhook-URL einfügen", {"webhookurlsetzen"}, "!ACHTUNG!: Gib die Webhook-URL nicht weiter.\nHiermit wird die Webhook-URL in die Datei geschrieben.", function()
+--        menu.show_command_box("webhookurlsetzen ")
+--    end, function(webhook_url)
+--        if string.startswith(webhook_url, "/api") then
+--            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", webhook_url)
+--            util.restart_script()
+--        elseif string.startswith(webhook_url, "https://discord.com/api/webhooks") then
+--            webhook_url = string.sub(webhook_url, string.lfind(webhook_url, "/api"))
+--            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", webhook_url)
+--            util.restart_script()
+--        else
+--            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://discord.com/api/webhooks' oder '/api/webhooks' beginnt.") end
+--        end
+--    end)
+--else
+--    has_webhookurl = true
+--end
 
 --Datenbank URL
-if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt") then
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "w")
-    file:close()
-end
+--if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt") then
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "w")
+--    file:close()
+--end
 
 --Schreibt die Datenbank-URL in die vorgesehene Datei
-function write_url_to_file(file_path, website_url)
-    local file = io.open(file_path, "w")
-    file:write(website_url)
-    file:close()
-    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
-    util.restart_script()
-end
+--function write_url_to_file(file_path, website_url)
+--    local file = io.open(file_path, "w")
+--    file:write(website_url)
+--    file:close()
+--    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+--    util.restart_script()
+--end
 
 --Holt sich die Datenbank-URL aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "r")
@@ -195,43 +208,43 @@ local website_url = file:read("a")
 file:close()
 
 --Wenn die Datenbank-URL nicht mit "https://nolimit" beginnt, wird die eingabe gelöscht
-if string.len(website_url) > 0 and not string.startswith(website_url, "https://nolimit") then
-    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige URL zu sein,\nEingabe wird gelöscht") end
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "w")
-    file:close()
-end
+--if string.len(website_url) > 0 and not string.startswith(website_url, "https://nolimit") then
+--    if critical_notification then util.toast(sprefix .. " Das scheint nicht die gültige URL zu sein,\nEingabe wird gelöscht") end
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "w")
+--    file:close()
+--end
 
 --Wenn keine Datenbank-URL gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
-if string.len(website_url) == 0 then
-    if normal_notification then util.toast(sprefix .. " Keine Datenbank-URL gesetzt, setze diese mit der Option 'Datenbank-URL einfügen'\nGib die Datenbank-URL nicht weiter") end
-    menu.action(menu.my_root(), "Datenbank-URL einfügen", {"datenbankurlsetzen"}, "!ACHTUNG!: Gib die Datenbank-URL nicht weiter.\nHiermit wird die Datenbank-URL in die Datei geschrieben.", function()
-        menu.show_command_box("datenbankurlsetzen ")
-    end, function(website_url)
-        if string.startswith(website_url, "https://nolimit") then
-            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", website_url)
-            util.restart_script()
-        else
-            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://nolimit' beginnt.") end
-        end
-    end)
-else
-    has_websiteurl = true
-end
+--if string.len(website_url) == 0 then
+--    if normal_notification then util.toast(sprefix .. " Keine Datenbank-URL gesetzt, setze diese mit der Option 'Datenbank-URL einfügen'\nGib die Datenbank-URL nicht weiter") end
+--    menu.action(menu.my_root(), "Datenbank-URL einfügen", {"datenbankurlsetzen"}, "!ACHTUNG!: Gib die Datenbank-URL nicht weiter.\nHiermit wird die Datenbank-URL in die Datei geschrieben.", function()
+--        menu.show_command_box("datenbankurlsetzen ")
+--    end, function(website_url)
+--        if string.startswith(website_url, "https://nolimit") then
+--            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", website_url)
+--            util.restart_script()
+--        else
+--            if critical_notification then util.toast(sprefix .. " Ungültige URL stelle sicher, dass sie mit: 'https://nolimit' beginnt.") end
+--        end
+--    end)
+--else
+--    has_websiteurl = true
+--end
 
 --Website auth
-if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt") then
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "w")
-    file:close()
-end
+--if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt") then
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "w")
+--    file:close()
+--end
 
 --Schreibt die Datenbank-Key in die vorgesehene Datei
-function write_url_to_file(file_path, website_auth)
-    local file = io.open(file_path, "w")
-    file:write(website_auth)
-    file:close()
-    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
-    util.restart_script()
-end
+--function write_url_to_file(file_path, website_auth)
+--    local file = io.open(file_path, "w")
+--    file:write(website_auth)
+--    file:close()
+--    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+--    util.restart_script()
+--end
 
 --Holt sich die Datenbank-URL aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "r")
@@ -239,28 +252,28 @@ local website_auth = file:read("a")
 file:close()
 
 --Wenn die Datenbank-URL nicht mit "Basic " beginnt, wird die eingabe gelöscht
-if string.len(website_auth) > 0 and not string.startswith(website_auth, "Basic ") then
-    util.toast(sprefix .. " Das scheint nicht der gültige Key zu sein,\nEingabe wird gelöscht")
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "w")
-    file:close()
-end
+--if string.len(website_auth) > 0 and not string.startswith(website_auth, "Basic ") then
+--    util.toast(sprefix .. " Das scheint nicht der gültige Key zu sein,\nEingabe wird gelöscht")
+--    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "w")
+--    file:close()
+--end
 
 --Wenn keine Datenbank-URL gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
-if string.len(website_auth) == 0 then
-    util.toast(sprefix .. " Kein Datenbank Key gesetzt, setze diese mit der Option 'Datenbank Key einfügen'\nGib den Datenbank Key nicht weiter.")
-    menu.action(menu.my_root(), "Datenbank Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank Key nicht weiter.\nHiermit wird der Datenbank Key in die Datei geschrieben.", function()
-        menu.show_command_box("datenbankkeysetzen ")
-    end, function(website_auth)
-        if string.startswith(website_auth, "Basic ") then
-            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", website_auth)
-            util.restart_script()
-        else
-            if critical_notification then util.toast(sprefix .. " Ungültiger Key stelle sicher, dass er mit: 'Basic' beginnt.") end
-        end
-    end)
-else
-    has_websiteauth = true
-end
+--if string.len(website_auth) == 0 then
+--    util.toast(sprefix .. " Kein Datenbank Key gesetzt, setze diese mit der Option 'Datenbank Key einfügen'\nGib den Datenbank Key nicht weiter.")
+--    menu.action(menu.my_root(), "Datenbank Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank Key nicht weiter.\nHiermit wird der Datenbank Key in die Datei geschrieben.", function()
+--        menu.show_command_box("datenbankkeysetzen ")
+--    end, function(website_auth)
+--        if string.startswith(website_auth, "Basic ") then
+--            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", website_auth)
+--            util.restart_script()
+--        else
+--            if critical_notification then util.toast(sprefix .. " Ungültiger Key stelle sicher, dass er mit: 'Basic' beginnt.") end
+--        end
+--    end)
+--else
+--    has_websiteauth = true
+--end
 
 --Code um Detections zu erkennen
 local detections_log = {}
@@ -281,6 +294,8 @@ end
 local detection_types = menu.ref_by_path("Online>Protections>Detections"):getChildren():map(|d| -> lang.get_localised(d.menu_name)):filter(|d| -> not d in detection_excludes):reorder()
 local values = {}
 local checkmodderdb = true
+
+menu.divider(menu.my_root(), "PrivatePlayerDatabase " .. sversion)
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- #Spieler Suche
 if has_webhookurl and has_websiteurl and has_websiteauth then
@@ -736,6 +751,12 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         end
                         players_reported = players_reported + 1
                         util.toast(sprefix .. " Spieler wurde erfolgreich auf die Datenbank übertragen.")
+                        util.log(sprefix .. " Folgender Spieler wurde erfolgreich auf die Datenbank übertragen:")
+                        util.log(sprefix .. " Name: " .. psetname)
+                        util.log(sprefix .. " Rockstar ID: " .. psetrid)
+                        util.log(sprefix .. " Notiz: " .. psetnotizcomplete)
+                        util.log(sprefix .. " Link: " .. psetlink)
+                        util.log(sprefix .. " Status: " .. psetstatusString)
                         menu.trigger_commands("suche " .. psetname)
                         menu.focus(namerev)
                         menu.trigger_commands("dbsetname")
