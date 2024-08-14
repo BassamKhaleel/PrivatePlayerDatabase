@@ -36,6 +36,7 @@ if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
     auto_updater.run_auto_update({
         source_url="https://raw.githubusercontent.com/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto",
         script_relpath=SCRIPT_RELPATH,
+        project_url="https://github.com/BassamKhaleel/PrivatePlayerDatabase",
         check_interval=600,
         silent_updates=true,
         dependencies={
