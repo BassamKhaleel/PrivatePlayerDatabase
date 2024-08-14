@@ -37,6 +37,7 @@ if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
         source_url="https://raw.githubusercontent.com/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto",
         script_relpath=SCRIPT_RELPATH,
         project_url="https://github.com/BassamKhaleel/PrivatePlayerDatabase",
+        branch="main",
         check_interval=600,
         silent_updates=true,
         dependencies={
