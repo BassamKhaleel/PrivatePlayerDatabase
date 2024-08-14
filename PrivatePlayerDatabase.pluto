@@ -149,41 +149,33 @@ end
 --Holt sich die Webhook aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "r")
 local webhook_url = file:read("a")
+if not webhook_url == 0 then has_webhookurl = true end
 file:close()
 
 --Holt sich die Datenbank-URL aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "r")
 local website_url = file:read("a")
+if not webhook_url == 0 then has_websiteurl = true end
 file:close()
 
 --Holt sich den Datenbank-Key aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "r")
 local website_auth = file:read("a")
+if not webhook_url == 0 then has_websiteauth = true end
 file:close()
 
---Wenn die Datenbank-URL nicht mit "Basic " beginnt, wird die eingabe gelöscht
-if string.len(website_auth) > 0 and not string.startswith(website_auth, "Basic ") then
-    util.toast(sprefix .. " Das scheint nicht der gültige Key zu sein,\nEingabe wird gelöscht")
-    local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "w")
-    file:close()
+--Wenn keine eigener Datenbank-Key gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
+if string.len(website_auth) == 0 then
+    util.toast(sprefix .. " Kein Datenbank-Key gesetzt, setze diese mit der Option 'Datenbank-Key einfügen'\nGib den Datenbank-Key nicht weiter.")
+    menu.hyperlink(menu.my_root(), "Website", "https://www.nolimitsrecovery.de/register/", "Erstelle dir hier einen Account.")
+    menu.hyperlink(menu.my_root(), "Base64Decoder", "https://www.base64decode.org/", "Erstelle dir hier mit deinem Benutzernamen und Passwort deinen eigenen Datenbank-Key.\nbenutzername:passwort in das obere Feld schreiben und das Ergebnis von unten kopieren.")
+    menu.action(menu.my_root(), "Datenbank-Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank-Key nicht weiter.\nFür den Datenbank-Key brauchst du einen Account auf meiner Website.", function()
+        menu.show_command_box("datenbankkeysetzen ")
+    end, function()
+    end)
+else
+    has_websiteauth = true
 end
-
---Wenn keine Datenbank-URL gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
---if string.len(website_auth) == 0 then
---    util.toast(sprefix .. " Kein Datenbank Key gesetzt, setze diese mit der Option 'Datenbank Key einfügen'\nGib den Datenbank Key nicht weiter.")
---    menu.action(menu.my_root(), "Datenbank Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank Key nicht weiter.\nHiermit wird der Datenbank Key in die Datei geschrieben.", function()
---        menu.show_command_box("datenbankkeysetzen ")
---    end, function(website_auth)
---        if string.startswith(website_auth, "Basic ") then
---            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", website_auth)
---            util.restart_script()
---        else
---            if critical_notification then util.toast(sprefix .. " Ungültiger Key stelle sicher, dass er mit: 'Basic' beginnt.") end
---        end
---    end)
---else
---    has_websiteauth = true
---end
 
 --Code um Detections zu erkennen
 local detections_log = {}
@@ -205,7 +197,9 @@ local detection_types = menu.ref_by_path("Online>Protections>Detections"):getChi
 local values = {}
 local checkmodderdb = true
 
-menu.divider(menu.my_root(), "PrivatePlayerDatabase " .. sversion)
+if has_webhookurl and has_websiteurl and has_websiteauth then
+    menu.divider(menu.my_root(), "PrivatePlayerDatabase " .. sversion)
+end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- #Spieler Suche
 if has_webhookurl and has_websiteurl and has_websiteauth then
@@ -412,7 +406,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                                     end)
                                     async_http.set_method("UPDATE")
                                     async_http.set_post("application/json", json.encode(eutable))
-                                    async_http.add_header("Authorization", website_auth)
+                                    async_http.add_header("Authorization", "Basic " .. website_auth)
                                     async_http.dispatch()
                                 else
                                     util.toast(sprefix .. " Dir fehlt die Berechtigung dafür!")
@@ -433,7 +427,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                                 util.log(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
                                 util.toast(sprefix .. " Der Spieler " .. valuetable_name .. "(" .. valuetable_rid .. ") wurde erfolgreich aus der Datenbank gelöscht")
                             end)
-                            async_http.add_header("Authorization", website_auth)
+                            async_http.add_header("Authorization", "Basic " .. website_auth)
                             async_http.set_method("DELETE")
                             async_http.dispatch()
                         else
@@ -453,7 +447,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     if normal_log then util.log($"{sprefix} Der eingegebene Name steht nicht in der Datenbank. Probiere einen anderen!") end
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
         end)
     end
@@ -716,11 +710,11 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                         async_http.dispatch()
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
             if player_in_db == 0 then --Wenn Spieler noch nicht in der Datenbank steht--
@@ -1090,7 +1084,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1131,7 +1125,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Hidden From Player List") and report_hidden_from_playerlist then
@@ -1151,7 +1145,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1192,7 +1186,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Explosion Blaming") then
@@ -1212,7 +1206,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1253,7 +1247,7 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Damage Multiplier") and report_damage_multiplier then
@@ -1273,7 +1267,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1311,7 +1305,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Super Jump") and report_super_jump then
@@ -1331,7 +1325,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1369,7 +1363,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Modded Driveby Weapon") then
@@ -1391,7 +1385,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1429,7 +1423,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         elseif string.find(detection, "Modded Character Model") then
@@ -1451,7 +1445,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1489,7 +1483,7 @@ function send_to_webhook(pid, detection)
                     async_http.dispatch()
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
 
         -- elseif string.find(detection, "Attacking While Invulnerable") or string.find(detection, "Angriff Wärend Unverwundbar") then
@@ -1509,7 +1503,7 @@ function send_to_webhook(pid, detection)
         --                 end
         --             end)
         --             async_http.set_post("application/json", json.encode(tabletest))
-        --             async_http.add_header("Authorization", website_auth)
+        --             async_http.add_header("Authorization", "Basic " .. website_auth)
         --             async_http.dispatch()
 
         --             local body = [[
@@ -1548,7 +1542,7 @@ function send_to_webhook(pid, detection)
         --             async_http.dispatch()
         --         end
         --     end)
-        --     async_http.add_header("Authorization", website_auth)
+        --     async_http.add_header("Authorization", "Basic " .. website_auth)
         --     async_http.dispatch()
 
         elseif string.find(detection, "Modded Explosion") and report_modded_explo then
@@ -1568,7 +1562,7 @@ function send_to_webhook(pid, detection)
                         end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
-                    async_http.add_header("Authorization", website_auth)
+                    async_http.add_header("Authorization", "Basic " .. website_auth)
                     async_http.dispatch()
                     local body = [[
                         {
@@ -1609,11 +1603,11 @@ function send_to_webhook(pid, detection)
                     end
                 end
             end)
-            async_http.add_header("Authorization", website_auth)
+            async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch() 
         end
     end)
-    async_http.add_header("Authorization", website_auth)
+    async_http.add_header("Authorization", "Basic " .. website_auth)
     async_http.dispatch()
 end
 
@@ -1729,7 +1723,7 @@ players.on_join(function(pid)
             --menu.trigger_commands("historynote" .. playername .. " Streamer")
         end
     end)
-    async_http.add_header("Authorization", website_auth)
+    async_http.add_header("Authorization", "Basic " .. website_auth)
     async_http.dispatch()
     util.yield(200)
 end)
