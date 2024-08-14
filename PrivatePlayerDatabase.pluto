@@ -148,20 +148,25 @@ end
 --Holt sich die Webhook aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\webhook_url.txt", "r")
 local webhook_url = file:read("a")
-if not webhook_url == 0 then has_webhookurl = true end
 file:close()
 
 --Holt sich die Datenbank-URL aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_url.txt", "r")
 local website_url = file:read("a")
-if not webhook_url == 0 then has_websiteurl = true end
 file:close()
 
 --Holt sich den Datenbank-Key aus der txt
 local file = io.open(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", "r")
 local website_auth = file:read("a")
-if not webhook_url == 0 then has_websiteauth = true end
 file:close()
+
+function write_url_to_file(file_path, website_auth)
+    local file = io.open(file_path, "w")
+    file:write(website_auth)
+    file:close()
+    if normal_notification then util.toast(sprefix .. " Das Skript wird neu gestartet um die Änderungen anzuwenden.") end
+    util.restart_script()
+end
 
 --Wenn keine eigener Datenbank-Key gesetzt ist wird eine neue Funktion hinzugefügt um die URL einzutragen
 if string.len(website_auth) == 0 then
@@ -170,10 +175,22 @@ if string.len(website_auth) == 0 then
     menu.hyperlink(menu.my_root(), "Base64Decoder", "https://www.base64decode.org/", "Erstelle dir hier mit deinem Benutzernamen und Passwort deinen eigenen Datenbank-Key.\nbenutzername:passwort in das obere Feld schreiben und das Ergebnis von unten kopieren.")
     menu.action(menu.my_root(), "Datenbank-Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank-Key nicht weiter.\nFür den Datenbank-Key brauchst du einen Account auf meiner Website.", function()
         menu.show_command_box("datenbankkeysetzen ")
-    end, function()
+    end, function(website_auth)
+        if string.len(website_auth) > 0 then
+            write_url_to_file(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\website_auth.txt", website_auth)
+            util.restart_script()
+        end
     end)
 else
     has_websiteauth = true
+end
+
+if string.len(webhook_url) > 0 then
+    has_webhookurl = true
+end
+
+if string.len(website_url) > 0 then
+    has_websiteurl = true
 end
 
 --Code um Detections zu erkennen
