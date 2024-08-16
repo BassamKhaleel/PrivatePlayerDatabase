@@ -13,7 +13,7 @@ NetAccess = async_http.have_access()
 
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
-sversion = "0.5.4"
+sversion = "0.5.5"
 
 if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase") then
     filesystem.mkdir(filesystem.store_dir() .. "\\PrivatePlayerDatabase")
@@ -649,7 +649,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                 return
             end
 
-            local player_in_db = 0
+            player_in_db = 0
 
             async_http.init(website_url, "/players/?search_param=" .. tostring(psetrid), function(result, header, status_code)
                 if string.find(result, psetrid) then --Spieler ist bereits in der Datenbank--
@@ -657,71 +657,129 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
                     menu.trigger_commands("suche " .. psetname)
                     menu.focus(namerev)
                     player_in_db = player_in_db + 1
-                    util.toast(player_in_db)
                 else --Spieler ist noch nicht in der Datenbank wird aber an die Datenbank geschickt--
                     --player_in_db = player_in_db - player_in_db
                     local tabletest = {["name"] = tostring(psetname), ["rid"] = tonumber(psetrid), ["note"] = tostring(psetnotizcomplete), ["link"] = tostring(psetlink), ["status"] = tostring(psetstatusString)}
-                    async_http.init(website_url, "/players/", function(body, header, status_code)
-                        if status_code ~= 201 then --Wenn die Datenbank einen fehler meldet--
-                            util.log(sprefix .. " Die website meldet Code: " .. status_code)
-                            util.toast(sprefix .. " Die website meldet Code: " .. status_code)
+                    async_http.init(website_url, "/players/", function(body, header, status_code_add)
+                        if status_code_add == 403 then --Fehlende Berechtigung
+                            player_in_db = player_in_db + 1
+                            util.toast(sprefix .. " Fehlende Berechtigung!")
+                            util.log(sprefix .. " Fehlende Berechtigung!")
+                            util.toast(sprefix .. " Sollte das ein Fehler sein melde es dem Entwickler!")
+                            util.log(sprefix .. " Sollte das ein Fehler sein melde es dem Entwickler!")
+                            return
+                        end
+                        if status_code_add ~= 201 and status_code_add ~= 403 then
+                            player_in_db = player_in_db + 1
+                            util.log(sprefix .. " Die website meldet Code: " .. status_code_add)
+                            util.toast(sprefix .. " Die website meldet Code: " .. status_code_add)
                             util.toast(sprefix .. " Sollte der fehler weiterhin bestehen melde es dem Entwickler")
                         end
-                        players_reported = players_reported + 1
-                        util.toast(sprefix .. " Spieler wurde erfolgreich auf die Datenbank übertragen.")
-                        util.log(sprefix .. " Folgender Spieler wurde erfolgreich auf die Datenbank übertragen:")
-                        util.log(sprefix .. " Name: " .. psetname)
-                        util.log(sprefix .. " Rockstar ID: " .. psetrid)
-                        util.log(sprefix .. " Notiz: " .. psetnotizcomplete)
-                        util.log(sprefix .. " Link: " .. psetlink)
-                        util.log(sprefix .. " Status: " .. psetstatusString)
-                        menu.trigger_commands("suche " .. psetname)
-                        menu.focus(namerev)
-                        menu.trigger_commands("dbsetname")
-                        menu.trigger_commands("dbsetrid")
-                        menu.apply_default_state(psetnotizpresetref)
-                        menu.trigger_commands("dbsetnote")
-                        menu.trigger_commands("dbsetlink")
-                        menu.apply_default_state(psetstatusref)
+                        if status_code_add == 201 then
+                            util.toast(sprefix .. " Spieler wurde erfolgreich auf die Datenbank übertragen.")
+                            util.log(sprefix .. " Folgender Spieler wurde erfolgreich auf die Datenbank übertragen:")
+                            util.log(sprefix .. " Name: " .. psetname)
+                            util.log(sprefix .. " Rockstar ID: " .. psetrid)
+                            util.log(sprefix .. " Notiz: " .. psetnotizcomplete)
+                            util.log(sprefix .. " Link: " .. psetlink)
+                            util.log(sprefix .. " Status: " .. psetstatusString)
+                            menu.trigger_commands("suche " .. psetname)
+                            menu.focus(namerev)
+                            menu.trigger_commands("dbsetname")
+                            menu.trigger_commands("dbsetrid")
+                            menu.apply_default_state(psetnotizpresetref)
+                            menu.trigger_commands("dbsetnote")
+                            menu.trigger_commands("dbsetlink")
+                            menu.apply_default_state(psetstatusref)
 
-                        local name = players.get_name(players.user())
-                        local author_name = "Ein Spieler wurde auf die Datenbank übertragen"
-                        local description = "Es wurde von `" .. name .. "` ein " .. psetstatusString .. " auf die Datenbank übertragen.\\n\\nSpieler Informationen:"
-                        local body = [[
-                            {
-                                "embeds": [
+                            local name = players.get_name(players.user())
+                            local author_name = "Ein Spieler wurde auf die Datenbank übertragen"
+                            local description = "Es wurde von `" .. name .. "` ein " .. psetstatusString .. " auf die Datenbank übertragen.\\n\\nSpieler Informationen:"
+                            local body = [[
                                 {
-                                    "description": "]] .. description .. [[",
-                                    "timestamp": "]] .. os.date("!%Y-%m-%dT%XZ") .. [[",
-                                    "color": null,
-                                    "fields": [
-                                        {
-                                        "name": "Name",
-                                        "value": "]] .. tostring(psetname) .. [["
-                                        },
-                                        {
-                                        "name": "Rockstar ID",
-                                        "value": "]] .. tostring(psetrid) .. [["
-                                        },
-                                        {
-                                        "name": "Notiz",
-                                        "value": "]] .. tostring(psetnotizcomplete) .. [["
+                                    "embeds": [
+                                    {
+                                        "description": "]] .. description .. [[",
+                                        "timestamp": "]] .. os.date("!%Y-%m-%dT%XZ") .. [[",
+                                        "color": null,
+                                        "fields": [
+                                            {
+                                            "name": "Name",
+                                            "value": "]] .. tostring(psetname) .. [["
+                                            },
+                                            {
+                                            "name": "Rockstar ID",
+                                            "value": "]] .. tostring(psetrid) .. [["
+                                            },
+                                            {
+                                            "name": "Notiz",
+                                            "value": "]] .. tostring(psetnotizcomplete) .. [["
+                                            }
+                                        ],
+                                        "author": {
+                                        "name": "]] .. author_name .. [[",
+                                        "icon_url": "https://github.com/BassamKhaleel/Wasserzeichen_icon/blob/9bccde27bdda47a322b0e1e6026e58401f0062f2/icon.png?raw=true"
                                         }
-                                    ],
-                                    "author": {
-                                    "name": "]] .. author_name .. [[",
-                                    "icon_url": "https://github.com/BassamKhaleel/Wasserzeichen_icon/blob/9bccde27bdda47a322b0e1e6026e58401f0062f2/icon.png?raw=true"
                                     }
+                                    ],
+                                    "username": "PrivatePlayerDatabase",
+                                    "avatar_url": "https://github.com/BassamKhaleel/Wasserzeichen_icon/blob/9bccde27bdda47a322b0e1e6026e58401f0062f2/icon.png?raw=true"
                                 }
-                                ],
-                                "username": "PrivatePlayerDatabase",
-                                "avatar_url": "https://github.com/BassamKhaleel/Wasserzeichen_icon/blob/9bccde27bdda47a322b0e1e6026e58401f0062f2/icon.png?raw=true"
-                            }
-                        ]]
+                            ]]
 
-                        async_http.init("discord.com", webhook_url, function() end, function() end)
-                        async_http.set_post("application/json", body)
-                        async_http.dispatch()
+                            async_http.init("discord.com", webhook_url, function() end, function() end)
+                            async_http.set_post("application/json", body)
+                            async_http.dispatch()
+
+                            if player_in_db == 0 then --Wenn Spieler noch nicht in der Datenbank steht--
+                
+                                if note_for_modder then
+                                    if psetstatus == 3 then
+                                        menu.trigger_commands("historynote" .. psetname .. " Modder") 
+                                    end
+                                end
+                
+                                if block_modder_join then
+                                    if psetstatus == 3 then
+                                        menu.trigger_commands("historyblock " .. psetname .. " on") 
+                                    end
+                                end
+                
+                                if modder_join_notification then
+                                    if psetstatus == 3 then
+                                        menu.trigger_command(menu.ref_by_path("Online>Player History>" .. psetname .. ">Player Join Reactions>Notification"), "on")
+                                    end
+                                end
+                
+                                if timeout_modders then
+                                    if psetstatus == 3 then
+                                        menu.trigger_commands("timeout " .. psetname .. " on")
+                                    end
+                                end
+                
+                                if sc_block_modder then
+                                    if psetstatus == 3 then
+                                        if util.sc_is_blocked(psetrid) == false then
+                                            util.sc_block(psetrid)
+                                        end
+                                    end
+                                end
+                
+                                if auto_kick_modders then
+                                    if psetstatus == 3 then
+                                        menu.trigger_commands("kick" .. psetname)
+                                    end
+                                end
+                
+                                if sc_unblock_friend then
+                                    if psetstatus == 2 then
+                                        if util.sc_is_blocked(psetrid) == true then
+                                            util.sc_unblock(psetrid)
+                                        end
+                                    end
+                                end
+                            end
+                        end
                     end)
                     async_http.set_post("application/json", json.encode(tabletest))
                     async_http.add_header("Authorization", "Basic " .. website_auth)
@@ -730,55 +788,6 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             end)
             async_http.add_header("Authorization", "Basic " .. website_auth)
             async_http.dispatch()
-
-            if player_in_db == 0 then --Wenn Spieler noch nicht in der Datenbank steht--
-
-                if note_for_modder then
-                    if psetstatus == 3 then
-                        menu.trigger_commands("historynote" .. psetname .. " Modder") 
-                    end
-                end
-
-                if block_modder_join then
-                    if psetstatus == 3 then
-                        menu.trigger_commands("historyblock " .. psetname .. " on") 
-                    end
-                end
-
-                if modder_join_notification then
-                    if psetstatus == 3 then
-                        menu.trigger_command(menu.ref_by_path("Online>Player History>" .. psetname .. ">Player Join Reactions>Notification"), "on")
-                    end
-                end
-
-                if timeout_modders then
-                    if psetstatus == 3 then
-                        menu.trigger_commands("timeout " .. psetname .. " on")
-                    end
-                end
-
-                if sc_block_modder then
-                    if psetstatus == 3 then
-                        if util.sc_is_blocked(psetrid) == false then
-                            util.sc_block(psetrid)
-                        end
-                    end
-                end
-
-                if auto_kick_modders then
-                    if psetstatus == 3 then
-                        menu.trigger_commands("kick" .. psetname)
-                    end
-                end
-
-                if sc_unblock_friend then
-                    if psetstatus == 2 then
-                        if util.sc_is_blocked(psetrid) == true then
-                            util.sc_unblock(psetrid)
-                        end
-                    end
-                end    
-            end
         end)
     end
 end
