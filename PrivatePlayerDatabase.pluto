@@ -8,6 +8,9 @@ local auto_updater = require("auto-updater")
 local nativeFetchEndTime = util.current_time_millis() - nativeFetchStartTime
 util.log($"[PrivatePlayerDatabase] Natives in {nativeFetchEndTime}ms gefunden")
 
+--variable die prüft ob Internetzugang erlaubt ist--
+NetAccess = async_http.have_access()
+
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
 sversion = "0.5.4"
@@ -31,14 +34,14 @@ if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase\\web
     file:close()
 end
 
---Auto Updater
-if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
+--Auto Updater (Thanks to hexarobi)
+if NetAccess and SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
     auto_updater.run_auto_update({
         source_url="https://raw.githubusercontent.com/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto",
         script_relpath=SCRIPT_RELPATH,
         project_url="https://github.com/BassamKhaleel/PrivatePlayerDatabase",
         branch="main",
-        check_interval=600,
+        check_interval=7200,
         silent_updates=true,
         dependencies={
             "store/PrivatePlayerDatabase/webhook_url.txt",
@@ -81,9 +84,6 @@ report_modded_explo = true
 report_super_jump = true
 report_damage_multiplier = true
 report_hidden_from_playerlist = true
-
---variable die prüft ob Internetzugang erlaubt ist--
-NetAccess = async_http.have_access()
 
 --variable um die Funktionen auszublenden falls keine Webhook-URL oder Website-URL oder Website auth gesetzt ist
 has_webhookurl = false
@@ -172,7 +172,7 @@ end
 if string.len(website_auth) == 0 then
     util.toast(sprefix .. " Kein Datenbank-Key gesetzt, setze diese mit der Option 'Datenbank-Key einfügen'\nGib den Datenbank-Key nicht weiter.")
     menu.hyperlink(menu.my_root(), "Website", "https://www.nolimitsrecovery.de/register/", "Erstelle dir hier einen Account.")
-    menu.hyperlink(menu.my_root(), "Base64Decoder", "https://www.base64decode.org/", "Erstelle dir hier mit deinem Benutzernamen und Passwort deinen eigenen Datenbank-Key.\nbenutzername:passwort in das obere Feld schreiben und das Ergebnis von unten kopieren.")
+    menu.hyperlink(menu.my_root(), "Base64Decoder", "https://www.base64decode.org/", 'Erstelle dir hier mit deinem Benutzernamen und Passwort deinen eigenen Datenbank-Key.\nBeispiel: benutzername:passwort in das obere Feld schreiben und das Ergebnis von unten kopieren und bei "Datenbank-Key einfügen" einsetzen.')
     menu.action(menu.my_root(), "Datenbank-Key einfügen", {"datenbankkeysetzen"}, "!ACHTUNG!: Gib den Datenbank-Key nicht weiter.\nFür den Datenbank-Key brauchst du einen Account auf meiner Website.", function()
         menu.show_command_box("datenbankkeysetzen ")
     end, function(website_auth)
@@ -895,15 +895,26 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
         local db_script_settings <const> = menu.list(menu.my_root(), "Skript Einstellungen" , {}, "") --Skript Einstellungen liste--
         menu.divider(db_script_settings, "Skript Einstellungen")
 
-        --if NetAccess then
-        --    if SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
-        --        menu.action(db_script_settings, "Aktualisieren", {}, "Das Skript sucht alle 2 Stunden automatisch nach Updates, aber du kannst auch manuell nach Updates suchen.", function()
-        --            auto_update_config.check_interval = 0
-        --            util.toast(sprefix .. " Suche nach Update")
-        --            auto_updater.run_auto_update(auto_update_config)
-        --        end)
-        --    end
-        --end
+        Auto_update_config = {
+            source_url="https://raw.githubusercontent.com/BassamKhaleel/PrivatePlayerDatabase/main/PrivatePlayerDatabase.pluto",
+            script_relpath=SCRIPT_RELPATH,
+            project_url="https://github.com/BassamKhaleel/PrivatePlayerDatabase",
+            branch="main",
+            check_interval=600,
+            silent_updates=true,
+            dependencies={
+                "store/PrivatePlayerDatabase/webhook_url.txt",
+                "store/PrivatePlayerDatabase/website_url.txt",
+            },
+        }
+
+        if NetAccess and SCRIPT_FILENAME == "PrivatePlayerDatabase-DEV.lua" then
+            menu.action(db_script_settings, "Skript Aktualisieren", {}, "Das Skript sucht alle 2 Stunden automatisch nach Updates, aber du kannst auch manuell nach Updates suchen.", function()
+                Auto_update_config.check_interval = 0
+                util.toast(sprefix .. " Suche nach Update")
+                auto_updater.run_auto_update(Auto_update_config)
+            end)
+        end
 
         if has_webhookurl and has_websiteurl and has_websiteauth then
             if NetAccess then --Zeigt die Funktion nur wenn das Skript internet zugang hat--
