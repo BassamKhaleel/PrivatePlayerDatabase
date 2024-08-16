@@ -906,7 +906,7 @@ if has_webhookurl and has_websiteurl and has_websiteauth then
             },
         }
 
-        if NetAccess and SCRIPT_FILENAME == "PrivatePlayerDatabase-DEV.lua" then
+        if NetAccess and SCRIPT_FILENAME == "PrivatePlayerDatabase.pluto" then
             menu.action(db_script_settings, "Skript Aktualisieren", {}, "Das Skript sucht alle 2 Stunden automatisch nach Updates, aber du kannst auch manuell nach Updates suchen.", function()
                 Auto_update_config.check_interval = 0
                 util.toast(sprefix .. " Suche nach Update")
