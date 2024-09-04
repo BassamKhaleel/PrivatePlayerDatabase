@@ -13,7 +13,7 @@ NetAccess = async_http.have_access()
 
 --skript prefix--
 sprefix = "[PrivatePlayerDatabase]"
-sversion = "24.8.5"
+sversion = "24.9.1"
 
 if not filesystem.exists(filesystem.store_dir() .. "\\PrivatePlayerDatabase") then
     filesystem.mkdir(filesystem.store_dir() .. "\\PrivatePlayerDatabase")
